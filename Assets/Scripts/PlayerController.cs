@@ -5,16 +5,25 @@ using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
+    public GameManager gm; // Reference to the game manager
     public InputAction moveAction; // Reference to the InputAction for movement
+
     public float moveSpeed = 5f; // Speed at which the player moves
     private bool isMoving = false; // Flag to check if the player is currently moving
+
     public Tilemap groundLayer; // Reference to the ground tilemap
     public Tilemap obstacleLayer; // Reference to the obstacle tilemap
     public Tilemap wallLayer; // Reference to the wall tilemap
     public Tilemap fogLayer; // Reference to the fog tilemap
+    public Tilemap objectiveLayer; // Reference to the objective tilemap
+
     public int fogRevealRadius = 2; // Radius around the player to reveal fog
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
-    private Vector3Int endPosition; // Endgame position of the player in grid coordinates
+
+    private bool onObstacle = false; // Flag to indicate the player is deciding on an obstacle
+    private bool onRespawn = false; // Flag to indicate the player is selecting skills on respawn
+    private bool obstaclePassed = false; // Flag to indicate the player passed an obstacle
+    private bool gameOver = false; // Flag to indicate the player reached the end of the map
 
     void Start()
     {
@@ -22,12 +31,14 @@ public class PlayerController : MonoBehaviour
         startingPosition = groundLayer.WorldToCell(transform.position);
         // Set the position of the player to the center of the starting tile
         transform.position = groundLayer.GetCellCenterWorld(startingPosition);
+        // Reveal the fog on the starting position
+        RevealFog(startingPosition);
     }
 
     void Update()
     {
-        // Check if the player is already moving
-        if (isMoving)
+        // Check if the player can move
+        if (isMoving || onObstacle || onRespawn || gameOver)
         {
             return;
         }
@@ -103,6 +114,7 @@ public class PlayerController : MonoBehaviour
             }
             // Ensure the player is exactly at the snap destination
             transform.position = snapDestination;
+            PassedObstacle();
             // Reveal the fog around the player after moving
             RevealFog(targetCell);
             // Get the new movement direction from the input action
@@ -119,22 +131,27 @@ public class PlayerController : MonoBehaviour
         {
             return false;
         }
+        // If the target cell is the end position of the map
+        if (objectiveLayer.HasTile(cell))
+        {
+            // Game over
+            gameOver = true;
+            // Signal the game manager to show the game over screen
+            gm.GameOver();
+            return true;
+        }
         // Check if the target cell has an obstacle and handle it accordingly
         if (obstacleLayer.HasTile(cell))
         {
-            CheckObstacleType(cell);
-            return true;
+            // Get the obstacle tile at the specified cell
+            TileBase obstacleTile = obstacleLayer.GetTile(cell);
+            // Get the obstacle tile name
+            string obsName = obstacleTile.name;
+            // Let the game manager handle the obstacle
+            return gm.ManageObstacle(obsName, cell);
         }
         // If the target cell is valid and not blocked, allow movement
         return true;
-    }
-
-    private void CheckObstacleType(Vector3Int cell)
-    {
-        // Get the obstacle tile at the specified cell
-        TileBase obstacleTile = obstacleLayer.GetTile(cell);
-        // Log the name of the obstacle tile, here we manage the obstacle mechanic, later
-        Debug.Log("Obstacle found: " + obstacleTile.name);
     }
 
     private void RevealFog(Vector3Int radiusCenter)
@@ -148,6 +165,48 @@ public class PlayerController : MonoBehaviour
                 Vector3Int fogCell = new Vector3Int(radiusCenter.x + x, radiusCenter.y + y, radiusCenter.z);
                 fogLayer.SetTile(fogCell, null);
             }
+        }
+    }
+
+    public void SetOnObstacle(bool obs)
+    {
+        // Set the flag to indicate the player is deciding on an obstacle
+        onObstacle = obs;
+    }
+
+    public void SetOnRespawn(bool res)
+    {
+        // Set the flag to indicate the player is deciding on respawn
+        onRespawn = res;
+    }
+
+    public void SetObstaclePassed()
+    {
+        // Set the flag to indicate the obstacle was crossed
+        obstaclePassed = true;
+    }
+
+    public void CrossObstacle(Vector3Int pos)
+    {
+        // Set the player position to the obstacle position to cross it
+        transform.position = groundLayer.GetCellCenterWorld(pos);
+    }
+
+    public void Retreat()
+    {
+        // Set the position of the player to the center of the starting position to respawn
+        transform.position = groundLayer.GetCellCenterWorld(startingPosition);
+    }
+
+    private void PassedObstacle()
+    {
+        // If the player crosses an obstacle
+        if (obstaclePassed)
+        {
+            // Reset the flag, to use it later on another obstacle
+            obstaclePassed = false;
+            // Signal the game manager to show the corresponding panel and messages
+            gm.ObstaclePassed();
         }
     }
 }

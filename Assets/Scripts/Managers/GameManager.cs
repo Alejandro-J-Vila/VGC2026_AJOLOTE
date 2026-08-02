@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     // Enum that represents all of the different obstacles in game
-    public enum Obstacle : byte { RedO, GreenO, BlueO, YellowO, VioletO, OrangeO }
+    public enum Obstacle : byte { RedO, GreenO, BlueO, YellowO, PinkO, OrangeO }
     // Enum that represent all of the different skills in game
-    public enum Skill : byte { RedS, GreenS, BlueS, YellowS, VioletS, OrangeS, NoSkill, NoLimb }
+    public enum Skill : byte { RedS, GreenS, BlueS, YellowS, PinkS, OrangeS, NoSkill, NoLimb }
 
     private Skill skill_1; // First player skill
     private Skill skill_2; // Second player skill
@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
     private Skill currentSelectedSkill; // Current selected skill by the player in the reset menu 
 
     // Temporary list of skill descriptions, this will go to the text manager later
-    private string[] skillDescriptions = new string[] { "Red skill", "Green skill", "Blue skill", "Yellow skill", "Violet skill", "Orange skill" };
+    private string[] skillDescriptions = new string[] { "Red skill", "Green skill", "Blue skill", "Yellow skill", "Pink skill", "Orange skill" };
     public Sprite[] skillSprites; // List of all skill sprites
 
     public GameObject resetPanel; // Reference to the reset panel
@@ -301,32 +301,32 @@ public class GameManager : MonoBehaviour
         switch (name)
         {
             // Depending on the obstacle name, set the corresponding obstacle type
-            case "obstacle_1":
+            case "red_obs":
                 {
                     obstacleEncountered = Obstacle.RedO;
                     break;
                 }
-            case "obstacle_2":
+            case "green_obs":
                 {
                     obstacleEncountered = Obstacle.GreenO;
                     break;
                 }
-            case "obstacle_3":
+            case "blue_obs":
                 {
                     obstacleEncountered = Obstacle.BlueO;
                     break;
                 }
-            case "obstacle_4":
+            case "yellow_obs":
                 {
                     obstacleEncountered = Obstacle.YellowO;
                     break;
                 }
-            case "obstacle_5":
+            case "pink_obs":
                 {
-                    obstacleEncountered = Obstacle.VioletO;
+                    obstacleEncountered = Obstacle.PinkO;
                     break;
                 }
-            case "obstacle_7":
+            case "orange_obs":
                 {
                     obstacleEncountered = Obstacle.OrangeO;
                     break;

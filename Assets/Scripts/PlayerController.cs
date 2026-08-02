@@ -19,6 +19,13 @@ public class PlayerController : MonoBehaviour
 
     public int fogRevealRadius = 2; // Radius around the player to reveal fog
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
+    private Vector3Int endPosition; // End position of the player in grid coordinates
+
+    public Sprite playerUp; // Sprite for the player facing up
+    public Sprite playerDown; // Sprite for the player facing down
+    public Sprite playerLeft; // Sprite for the player facing left
+    public Sprite playerRight; // Sprite for the player facing right
+    private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
 
     private bool onObstacle = false; // Flag to indicate the player is deciding on an obstacle
     private bool onRespawn = false; // Flag to indicate the player is selecting skills on respawn
@@ -27,8 +34,11 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        // Snap the player to the center of the starting tile
-        startingPosition = groundLayer.WorldToCell(transform.position);
+        // Initialize the start and end positions of the player in grid coordinates
+        startingPosition = new Vector3Int(-1, -9, 0);
+        endPosition = new Vector3Int(2, 44, 0);
+        // Get the sprite renderer component attached to the player
+        spriteRenderer = GetComponent<SpriteRenderer>();
         // Set the position of the player to the center of the starting tile
         transform.position = groundLayer.GetCellCenterWorld(startingPosition);
         // Reveal the fog on the starting position
@@ -44,9 +54,12 @@ public class PlayerController : MonoBehaviour
         }
         // Get the movement direction from the input action
         Vector3 targetDirection = GetMovementDirection();
-        // If there is a valid movement direction, start the movement coroutine
+        // If there is a valid movement direction
         if (targetDirection != Vector3.zero)
         {
+            // Set the apropriate sprite for the player based on the direction
+            SetPlayerSprite(targetDirection);
+            // Start the movement coroutine
             StartCoroutine(ConstantGridMovement(targetDirection));
         }
     }
@@ -87,6 +100,26 @@ public class PlayerController : MonoBehaviour
         return Vector3.zero;
     }
 
+    private void SetPlayerSprite(Vector3 direction)
+    {
+        if (direction == Vector3.up)
+        {
+            spriteRenderer.sprite = playerUp;
+        }
+        else if (direction == Vector3.down)
+        {
+            spriteRenderer.sprite = playerDown;
+        }
+        else if (direction == Vector3.left)
+        {
+            spriteRenderer.sprite = playerLeft;
+        }
+        else if (direction == Vector3.right)
+        {
+            spriteRenderer.sprite = playerRight;
+        }
+    }
+
     private IEnumerator ConstantGridMovement(Vector3 direction)
     {
         // Set the isMoving flag to true to indicate that the player is moving
@@ -119,6 +152,8 @@ public class PlayerController : MonoBehaviour
             RevealFog(targetCell);
             // Get the new movement direction from the input action
             currentDirection = GetMovementDirection();
+            // Set the apropriate sprite for the player based on the direction
+            SetPlayerSprite(currentDirection);
         }
         // Set the isMoving flag to false to indicate that the player has stopped moving
         isMoving = false;
@@ -132,7 +167,7 @@ public class PlayerController : MonoBehaviour
             return false;
         }
         // If the target cell is the end position of the map
-        if (objectiveLayer.HasTile(cell))
+        if (endPosition == cell && objectiveLayer.HasTile(cell))
         {
             // Game over
             gameOver = true;
@@ -196,6 +231,8 @@ public class PlayerController : MonoBehaviour
     {
         // Set the position of the player to the center of the starting position to respawn
         transform.position = groundLayer.GetCellCenterWorld(startingPosition);
+        // Update the sprite to face up after respawning
+        SetPlayerSprite(Vector3.up);
     }
 
     private void PassedObstacle()

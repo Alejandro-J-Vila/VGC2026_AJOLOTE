@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
 
     public int fogRevealRadius = 2; // Radius around the player to reveal fog
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
-    private Vector3Int endPosition; // End position of the player in grid coordinates
+    public Vector3Int endPosition; // End position of the player in grid coordinates
 
     public Sprite playerUp; // Sprite for the player facing up
     public Sprite playerDown; // Sprite for the player facing down
@@ -102,6 +102,7 @@ public class PlayerController : MonoBehaviour
 
     private void SetPlayerSprite(Vector3 direction)
     {
+        // Set the sprite of the player based on the movement direction
         if (direction == Vector3.up)
         {
             spriteRenderer.sprite = playerUp;
@@ -179,11 +180,9 @@ public class PlayerController : MonoBehaviour
         if (obstacleLayer.HasTile(cell))
         {
             // Get the obstacle tile at the specified cell
-            TileBase obstacleTile = obstacleLayer.GetTile(cell);
-            // Get the obstacle tile name
-            string obsName = obstacleTile.name;
+            ObstacleTile obstacleTile = (ObstacleTile)obstacleLayer.GetTile(cell);
             // Let the game manager handle the obstacle
-            return gm.ManageObstacle(obsName, cell);
+            return gm.ManageObstacle(obstacleTile, cell);
         }
         // If the target cell is valid and not blocked, allow movement
         return true;

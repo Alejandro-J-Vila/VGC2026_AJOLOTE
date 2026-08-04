@@ -1,55 +1,23 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    // Enum that represents all of the different obstacles in game
-    public enum Obstacle : byte { RedO, GreenO, BlueO, YellowO, PinkO, OrangeO }
-    // Enum that represent all of the different skills in game
-    public enum Skill : byte { RedS, GreenS, BlueS, YellowS, PinkS, OrangeS, NoSkill, NoLimb }
-
-    private Skill skill_1; // First player skill
-    private Skill skill_2; // Second player skill
-    private Skill skill_3; // Third player skill
-
-    public Image skillImage_1; // UI image that represent the first skill the player has in game
-    public Image skillImage_2; // UI image that represent the second skill the player has in game
-    public Image skillImage_3; // UI image that represent the third skill the player has in game
-
-    public Image selectedSkillImage_1; // Image that represent the first selected skill in the reset menu
-    public Image selectedSkillImage_2; // Image that represent the second selected skill in the reset menu
-    public Image selectedSkillImage_3; // Image that represent the third selected skill in the reset menu
-
-    private bool slot1Free; // Flag to indicate if the first skill slot has no skill
-    private bool slot2Free; // Flag to indicate if the second skill slot has no skill
-    private bool slot3Free; // Flag to indicate if the third skill slot has no skill
-
-    private int skillCount = 6; // Total number of skills in the game
-    private bool[] selectedSkills; // Flag list for selecting random skills in the reset menu
-
-    private Skill skillChoice_1; // First skill choice
-    private Skill skillChoice_2; // Second skill choice
-    private Skill skillChoice_3; // Third skill choice
-    private Skill skillChoice_4; // FOurth skill choice
-
-    public Image skillChoiceImage_1; // Image that represent the first skill choice that the player can make in the reset menu
-    public Image skillChoiceImage_2; // Image that represent the second skill choice that the player can make in the reset menu
-    public Image skillChoiceImage_3; // Image that represent the third skill choice that the player can make in the reset menu
-    public Image skillChoiceImage_4; // Image that represent the fourth skill choice that the player can make in the reset menu
-
-    public TMP_Text skillChoiceText_1; // UI text for the description of the first skill choice
-    public TMP_Text skillChoiceText_2; // UI text for the description of the second skill choice
-    public TMP_Text skillChoiceText_3; // UI text for the description of the third skill choice
-    public TMP_Text skillChoiceText_4; // UI text for the description of the fourth skill choice
-
-    private Skill currentSelectedSkill; // Current selected skill by the player in the reset menu 
-
-    // Temporary list of skill descriptions, this will go to the text manager later
-    private string[] skillDescriptions = new string[] { "Red skill", "Green skill", "Blue skill", "Yellow skill", "Pink skill", "Orange skill" };
+    private Skill[] skillList; // List of all the skills in the game
     public Sprite[] skillSprites; // List of all skill sprites
+
+    private Skill[] skillSlots; // List of the skills the player has equipped
+    private int skillSlotsCount = 3; // Number of skill slots the player has
+    public Image[] skillSlotImagesG; // List of the UI images that represent the skills the player has equipped in game
+    public Image[] skillSlotImagesR; // List of the UI images that represent the skills the player has selected in the reset menu
+    
+    private Skill[] skillChoices; // List of the skills the player can choose from in the reset menu
+    private int skillChoicesCount = 4; // Number of skill choices the player can choose from in the reset menu
+    public Image[] skillChoiceImages; // Array of images that represent the skill choices in the reset menu
+    public TMP_Text[] skillChoiceTexts; // Array of UI texts for the descriptions of the skill choices
 
     public GameObject resetPanel; // Reference to the reset panel
     public Button resetChoicesButton; // Reference to the reset choice selection button in the reset menu
@@ -62,24 +30,27 @@ public class GameManager : MonoBehaviour
 
     public PlayerController pc; // Reference to the player
 
-    private Obstacle obstacleEncountered; // Type of the current obstacle encountered
     private Vector3Int currentObstaclePosition; // Position of the current ecountered obstacle
     private Image skillUsed; // Skill slot of the skill used to cross an obstacle safely
 
     private int limbsLeft = 3; // Number of limbs left
-    private bool limb1OK = true; // Limb 1 status
-    private bool limb2OK = true; // Limb 2 status
-    private bool limb3OK = true; // Limb 3 status
+
+    public GameObject compass;
+    private bool compassOn = true;
 
     void Start()
     {
+        // Create all the skills of the game
+        InitializeSkillList();
+        // Create the arrays for the skill slots and skill choices
+        skillSlots = new Skill[skillSlotsCount];
+        skillChoices = new Skill[skillChoicesCount];
         // At the start of the game the player has no skills
-        skill_1 = Skill.NoSkill;
-        skill_2 = Skill.NoSkill;
-        skill_3 = Skill.NoSkill;
-        skillImage_1.sprite = skillSprites[(int)skill_1];
-        skillImage_2.sprite = skillSprites[(int)skill_2];
-        skillImage_3.sprite = skillSprites[(int)skill_3];
+        for (int i = 0; i < skillSlotsCount; i++)
+        {
+            skillSlots[i] = skillList[(int)Skill.Skills.NoSkill];
+            skillSlotImagesG[i].sprite = skillSlots[i].icon;
+        }
         // Setup all the components of the reset menu
         SetupResetMenu(false);
         // Hide all the panels used later
@@ -90,25 +61,55 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(false);
     }
 
+    private void Update()
+    {
+        if (compassOn)
+        {
+            RotateTowardsEnd();
+        }
+    }
+
+    private void RotateTowardsEnd()
+    {
+        // Get the position of the player and the end position
+        Vector3 playerPos = pc.transform.position;
+        Vector3 endPos = pc.objectiveLayer.GetCellCenterWorld(pc.endPosition);
+        // Calculate the direction from the player to the end position
+        Vector3 direction = (endPos - playerPos).normalized;
+        // Calculate the angle in degrees between the player's forward direction and the direction to the end position
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        // Rotate the compass to point towards the end position
+        compass.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+    }
+
+    private void InitializeSkillList()
+    {
+        // Create the skill list
+        skillList = new Skill[8];
+        // Initialize the skills list with all the skills in the game
+        skillList[(int)Skill.Skills.RedS] = new Skill(Skill.Skills.RedS, "Red skill", skillSprites[(int)Skill.Skills.RedS]);
+        skillList[(int)Skill.Skills.GreenS] = new Skill(Skill.Skills.GreenS, "Green skill", skillSprites[(int)Skill.Skills.GreenS]);
+        skillList[(int)Skill.Skills.BlueS] = new Skill(Skill.Skills.BlueS, "Blue skill", skillSprites[(int)Skill.Skills.BlueS]);
+        skillList[(int)Skill.Skills.YellowS] = new Skill(Skill.Skills.YellowS, "Yellow skill", skillSprites[(int)Skill.Skills.YellowS]);
+        skillList[(int)Skill.Skills.PinkS] = new Skill(Skill.Skills.PinkS, "Pink skill", skillSprites[(int)Skill.Skills.PinkS]);
+        skillList[(int)Skill.Skills.OrangeS] = new Skill(Skill.Skills.OrangeS, "Orange skill", skillSprites[(int)Skill.Skills.OrangeS]);
+        skillList[(int)Skill.Skills.NoSkill] = new Skill(Skill.Skills.NoSkill, "-", skillSprites[(int)Skill.Skills.NoSkill]);
+        skillList[(int)Skill.Skills.NoLimb] = new Skill(Skill.Skills.NoLimb, "x", skillSprites[(int)Skill.Skills.NoLimb]);
+    }
+
     private void SetupResetMenu(bool randomSkills)
     {
-        // Set the free skill slots flag to indicate there are no skills selected
-        slot1Free = true;
-        slot2Free = true;
-        slot3Free = true;
         // Set the skill slot sprites to empty
-        selectedSkillImage_1.sprite = skillSprites[(int)Skill.NoSkill];
-        selectedSkillImage_2.sprite = skillSprites[(int)Skill.NoSkill];
-        selectedSkillImage_3.sprite = skillSprites[(int)Skill.NoSkill];
+        for (int i = 0; i < skillSlotsCount; i++)
+        {
+            skillSlotImagesR[i].sprite = skillSprites[(int)Skill.Skills.NoSkill];
+        }
         // Set the skill selection slots to color white and enable the trigger, so they can be clicked
-        skillChoiceImage_1.color = Color.white;
-        skillChoiceImage_1.GetComponent<EventTrigger>().enabled = true;
-        skillChoiceImage_2.color = Color.white;
-        skillChoiceImage_2.GetComponent<EventTrigger>().enabled = true;
-        skillChoiceImage_3.color = Color.white;
-        skillChoiceImage_3.GetComponent<EventTrigger>().enabled = true;
-        skillChoiceImage_4.color = Color.white;
-        skillChoiceImage_4.GetComponent<EventTrigger>().enabled = true;
+        for (int j = 0; j < skillChoicesCount; j++)
+        {
+            skillChoiceImages[j].color = Color.white;
+            skillChoiceImages[j].GetComponent<EventTrigger>().enabled = true;
+        }
         // If the random skills flag is on
         if (randomSkills)
         {
@@ -123,65 +124,86 @@ public class GameManager : MonoBehaviour
     private void ShowRandomSkills()
     {
         // Initialize the skills flag list to make the selection
-        selectedSkills = new bool[skillCount];
-        for (int i = 0; i < skillCount; i++)
+        bool [] selectedSkillFlags = new bool[Skill.totalNumberOfSkills];
+        for (int i = 0; i < Skill.totalNumberOfSkills; i++)
         {
             // Set all the flags false to make them selectable
-            selectedSkills[i] = false;
+            selectedSkillFlags[i] = false;
         }
-        // Select random skills to show in the reset menu
-        SelectRandomSkill(ref skillChoice_1, skillChoiceImage_1, skillChoiceText_1);
-        SelectRandomSkill(ref skillChoice_2, skillChoiceImage_2, skillChoiceText_2);
-        SelectRandomSkill(ref skillChoice_3, skillChoiceImage_3, skillChoiceText_3);
-        SelectRandomSkill(ref skillChoice_4, skillChoiceImage_4, skillChoiceText_4);
+        for (int j = 0; j < skillChoicesCount; j++)
+        {
+            // Get a random number between 0 and the amount of skills
+            int rndS = Random.Range(0, Skill.totalNumberOfSkills);
+            bool notSelected = true;
+            // While we didn't select a skill to show in the reset menu
+            while (notSelected)
+            {
+                // If the skill selected is not previously selected
+                if (!selectedSkillFlags[rndS])
+                {
+                    // Select the corresponding skill
+                    Skill skill = skillList[rndS];
+                    // Save the skill in the skill choices list
+                    skillChoices[j] = skill;
+                    // Set the corresponding flag to indicate the skill is selected
+                    selectedSkillFlags[rndS] = true;
+                    // Set the skill choice sprite to the corresponding skill sprite
+                    skillChoiceImages[j].sprite = skill.icon;
+                    // Set the skill choice description text to the corresponding skill description
+                    skillChoiceTexts[j].SetText(skill.description);
+                    // Update the flag to indicate we selected a skill
+                    notSelected = false;
+                }
+                else
+                {
+                    // If the skill was selected previously, we try again with another selected at random
+                    rndS = Random.Range(0, Skill.totalNumberOfSkills);
+                }
+            }
+        }
     }
 
     /**
-     * This method is called from the reset panel when the player ckicks on one of the selection skills
+     * This method is called from the reset panel when the player ckicks on one of the skill choices
      */
     public void SelectSkill(int choice)
     {
         // Get the corresponding skill choice that was clicked by the player in the reset menu
-        Image skillChoice = GetSkillChoice(choice);
+        Skill selectedSkill = skillChoices[choice];
         // If the first skill slot is free
-        if (slot1Free)
+        if (skillSlots[0] == skillList[(int)Skill.Skills.NoLimb])
         {
-            // Assign the currently selected skill to the first slot
-            skill_1 = currentSelectedSkill;
-            // Set the skill slot to contain the selected skill and update the flag
-            slot1Free = SetupSkillChoiceUI(selectedSkillImage_1, skillChoice);
+            // Setup the skill choice
+            SetupSkillChoiceUI(0, choice, selectedSkill);
             // Activate the reset choices button, so the player can change his choices if they want
             resetChoicesButton.enabled = true;
-            return;
         }
         // If the second skill slot is free
-        if (slot2Free)
+        else if (skillSlots[1] == skillList[(int)Skill.Skills.NoLimb])
         {
-            // We do the same as before, but without the reset button because it's already active
-            skill_2 = currentSelectedSkill;
-            slot2Free = SetupSkillChoiceUI(selectedSkillImage_2, skillChoice);
-            return;
+            // Setup the skill choice
+            SetupSkillChoiceUI(1, choice, selectedSkill);
         }
-        // And the same with the third, but enabling the confirm choices button
-        if (slot3Free)
+        // If the second skill slot is free
+        else if (skillSlots[2] == skillList[(int)Skill.Skills.NoLimb])
         {
-            skill_3 = currentSelectedSkill;
-            slot3Free = SetupSkillChoiceUI(selectedSkillImage_3, skillChoice);
+            // Setup the skill choice
+            SetupSkillChoiceUI(2, choice, selectedSkill);
+            // Activate the confirm choices button
             confirmChoicesButton.enabled = true;
-            return;
         }
     }
 
-    private bool SetupSkillChoiceUI(Image skSlot, Image selSlot)
+    private void SetupSkillChoiceUI(int skSlot, int skChoice, Skill skill)
     {
-        // Set the skill slot sprite with the selected skill slot sprite
-        skSlot.sprite = selSlot.sprite;
-        // Change the color of the selected skill slot to indicate it was used
-        selSlot.color = Color.gray;
-        // Disable the trigger for the selected skill slot to prevent further use
-        selSlot.GetComponent<EventTrigger>().enabled = false;
-        // Return false to indicate the skill slot is no longer free
-        return false;
+        // Assign the currently selected skill to the corresponding slot
+        skillSlots[skSlot] = skill;
+        // Set the skill slot sprite in the reset menu with the selected skill slot sprite
+        skillSlotImagesR[skSlot].sprite = skill.icon;
+        // Change the color of the skill choice slot to indicate it was used
+        skillChoiceImages[skChoice].color = Color.gray;
+        // Disable the trigger for the skill choice slot to prevent further use
+        skillChoiceImages[skChoice].GetComponent<EventTrigger>().enabled = false;
     }
 
     /**
@@ -189,6 +211,11 @@ public class GameManager : MonoBehaviour
      */
     public void ResetChoices()
     {
+        // Reset the skill slots to no limb, so the player can select new skills
+        for (int i = 0; i < skillSlotsCount; i++)
+        {
+            skillSlots[i] = skillList[(int)Skill.Skills.NoLimb];
+        }
         // Setup the reset menu, without rerolling the skills showed
         SetupResetMenu(false);
     }
@@ -199,87 +226,27 @@ public class GameManager : MonoBehaviour
     public void ConfirmAndRespawn()
     {
         // Set the in-game skill slots sprites to the selected skills sprites
-        skillImage_1.sprite = selectedSkillImage_1.sprite;
-        skillImage_2.sprite = selectedSkillImage_2.sprite;
-        skillImage_3.sprite = selectedSkillImage_3.sprite;
+        for (int i = 0; i < skillSlotsCount; i++)
+        {
+            skillSlotImagesG[i].sprite = skillSlots[i].icon;
+        }
         // Hide the reset menu
         resetPanel.SetActive(false);
         // Signal the player to indicate the respawn is over
         pc.SetOnRespawn(false);
     }
 
-    private Image GetSkillChoice(int id)
-    {
-        // Depending on the given id
-        switch (id)
-        {
-            // Save the currently selected skill and return the corresponding skill choice image
-            case 1:
-                {
-                    currentSelectedSkill = skillChoice_1;
-                    return skillChoiceImage_1;
-                }   
-            case 2:
-                {
-                    currentSelectedSkill = skillChoice_2;
-                    return skillChoiceImage_2;
-                }
-            case 3:
-                {
-                    currentSelectedSkill = skillChoice_3;
-                    return skillChoiceImage_3;
-                }
-            case 4:
-                {
-                    currentSelectedSkill = skillChoice_4;
-                    return skillChoiceImage_4;
-                }
-        }
-        // If the id is not valid, return null
-        return null;
-    }
-
-    private void SelectRandomSkill(ref Skill skill, Image skillImg, TMP_Text skillTxt)
-    {
-        // Get a random number between 0 and the amount of skills
-        int rndS = Random.Range(0, skillCount);
-        bool notSelected = true;
-        // While we didn't select a skill to show in the reset menu
-        while (notSelected)
-        {
-            // If the skill selected is not previously selected
-            if (!selectedSkills[rndS])
-            {
-                // Select the corresponding skill, using the skills enum value
-                skill = (Skill)rndS;
-                // Set the corresponding flag to indicate the skill is selected
-                selectedSkills[rndS] = true;
-                // Set the skill choice sprite to the corresponding skill sprite
-                skillImg.sprite = skillSprites[rndS];
-                // Set the skill choice description text to the corresponding skill description
-                skillTxt.SetText(skillDescriptions[rndS]);
-                // Update the flag to indicate we selected a skill
-                notSelected = false;
-            }
-            else
-            {
-                // If the skill was selected previously, we try again with another selected at random
-                rndS = Random.Range(0, skillCount);
-            }
-        }
-    }
-
     /**
      * This method is called from the player controller when the player reaches an obstacle
      */
-    public bool ManageObstacle(string obsName, Vector3Int obsPos)
+    public bool ManageObstacle(ObstacleTile obstacle, Vector3Int obstaclePos)
     {
         // Save the current obstacle position
-        currentObstaclePosition = obsPos;
+        currentObstaclePosition = obstaclePos;
         // Get the obstacle type
-        GetObstacleType(obsName);
+        ObstacleTile.Obstacles obs = obstacle.obstacleName;
         // Check if the player has the skill to pass the obstacle
-        bool canMove = CheckSkills();
+        bool canMove = CheckSkills(obs);
         if (!canMove)
         {
             // If the player don't have the skill, show the obstacle panel to let them decide what to do
@@ -296,70 +263,19 @@ public class GameManager : MonoBehaviour
         return canMove;
     }
 
-    private void GetObstacleType(string name)
+    private bool CheckSkills(ObstacleTile.Obstacles obstacle)
     {
-        switch (name)
+        // Check if the player has the skill to pass the obstacle
+        for (int i = 0; i < skillSlotsCount; i++)
         {
-            // Depending on the obstacle name, set the corresponding obstacle type
-            case "red_obs":
-                {
-                    obstacleEncountered = Obstacle.RedO;
-                    break;
-                }
-            case "green_obs":
-                {
-                    obstacleEncountered = Obstacle.GreenO;
-                    break;
-                }
-            case "blue_obs":
-                {
-                    obstacleEncountered = Obstacle.BlueO;
-                    break;
-                }
-            case "yellow_obs":
-                {
-                    obstacleEncountered = Obstacle.YellowO;
-                    break;
-                }
-            case "pink_obs":
-                {
-                    obstacleEncountered = Obstacle.PinkO;
-                    break;
-                }
-            case "orange_obs":
-                {
-                    obstacleEncountered = Obstacle.OrangeO;
-                    break;
-                }
+            // Compare the skills with the obstacles
+            if ((byte)skillSlots[i].name == (byte)obstacle)
+            {
+                // If the player has the skill, save the skill slot used
+                skillUsed = skillSlotImagesG[i];
+                return true;
+            }
         }
-    }
-
-    private bool CheckSkills()
-    {
-        // Get the underline representation of the skills and obstacles
-        byte s1 = (byte)skill_1;
-        byte s2 = (byte)skill_2;
-        byte s3 = (byte)skill_3;
-        byte obs = (byte)obstacleEncountered;
-        // Compare each skill with the obstacle
-        // If one of the skills is the same type as the obstacle
-        if (s1 == obs)
-        {
-            // Save the skill for later use, to mark it when the obstacle is passed
-            skillUsed = skillImage_1;
-            return true;
-        }
-        if (s2 == obs)
-        {
-            skillUsed = skillImage_2;
-            return true;
-        }
-        if (s3 == obs)
-        {
-            skillUsed = skillImage_3;
-            return true;
-        }
-        // If there is no skill of the same type as the obstacle, return false
         return false;
     }
 
@@ -384,27 +300,23 @@ public class GameManager : MonoBehaviour
             {
                 // The order of limb loosing is from first to last
                 // If the limb exists
-                if (limb1OK)
+                if (skillSlots[0] != skillList[(byte)Skill.Skills.NoLimb])
                 {
-                    // Set it off
-                    limb1OK = false;
-                    // Set the skill that the limb had off
-                    skill_1 = Skill.NoLimb;
+                    // Its lost
+                    skillSlots[0] = skillList[(byte)Skill.Skills.NoLimb];
                     // And set the skill sprite to no limb to indicate is off
-                    skillImage_1.sprite = skillSprites[(int)skill_1];
+                    skillSlotImagesG[0].sprite = skillSlots[0].icon;
                 }
-                // Same with the other...
-                else if (limb2OK)
+                // Same with the others...
+                else if (skillSlots[1] != skillList[(byte)Skill.Skills.NoLimb])
                 {
-                    limb2OK = false;
-                    skill_2 = Skill.NoLimb;
-                    skillImage_2.sprite = skillSprites[(int)skill_2];
+                    skillSlots[1] = skillList[(byte)Skill.Skills.NoLimb];
+                    skillSlotImagesG[1].sprite = skillSlots[1].icon;
                 }
-                else if (limb3OK)
+                else if (skillSlots[2] != skillList[(byte)Skill.Skills.NoLimb])
                 {
-                    limb3OK = false;
-                    skill_3 = Skill.NoLimb;
-                    skillImage_3.sprite = skillSprites[(int)skill_3];
+                    skillSlots[2] = skillList[(byte)Skill.Skills.NoLimb];
+                    skillSlotImagesG[2].sprite = skillSlots[2].icon;
                 }
                 // Discount one limb to the counter
                 limbsLeft--;
@@ -431,9 +343,6 @@ public class GameManager : MonoBehaviour
             pc.Retreat();
             // Restore all the limbs lost
             limbsLeft = 3;
-            limb1OK = true;
-            limb2OK = true;
-            limb3OK = true;
         }
     }
 
@@ -484,5 +393,10 @@ public class GameManager : MonoBehaviour
     {
         // Show the game over panel
         gameOverPanel.SetActive(true);
+    }
+
+    public void PickItemUp()
+    {
+
     }
 }

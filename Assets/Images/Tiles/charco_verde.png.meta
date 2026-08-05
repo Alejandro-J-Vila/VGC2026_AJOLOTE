@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 220cfecf7d5aa2c418c2cbedd1d4df6a
+guid: 83960539f6797cf40abfb153a179be0f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 28907603459527793
-    second: personaje_izquierda_0
+      213: 9060981802858493091
+    second: charco_verde_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 125
+  spritePixelsToUnits: 250
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: personaje_izquierda_0
+      name: charco_verde_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 125
-        height: 125
+        width: 250
+        height: 250
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 174538bef43b66000800000000000000
-      internalID: 28907603459527793
+      spriteID: 3a4b8ab41f21fbd70800000000000000
+      internalID: 9060981802858493091
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      personaje_izquierda_0: 28907603459527793
+      charco_verde_0: 9060981802858493091
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9abc4578a9231414b8ddc7342b27e121
+guid: 70096fca31f99fd4e916a52848bc373b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1559266435552487528
-    second: personaje_abajo_0
+      213: -6047063582563035546
+    second: charco_naranja_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 125
+  spritePixelsToUnits: 250
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: personaje_abajo_0
+      name: charco_naranja_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 125
-        height: 125
+        width: 250
+        height: 250
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 868ab41df80a3a510800000000000000
-      internalID: 1559266435552487528
+      spriteID: 666112bd5b3841ca0800000000000000
+      internalID: -6047063582563035546
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      personaje_abajo_0: 1559266435552487528
+      charco_naranja_0: -6047063582563035546
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

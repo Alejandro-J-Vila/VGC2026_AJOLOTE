@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8ea84bcf804fad4f8e00e9060681359, type: 3}
   m_Name: orange_obs
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.Tilemaps.Tile
-  m_Sprite: {fileID: 893083710, guid: 03fcde6cf24f6d84e9af27d0f70c5cab, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 70096fca31f99fd4e916a52848bc373b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

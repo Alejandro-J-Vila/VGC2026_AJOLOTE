@@ -3,7 +3,7 @@ using UnityEngine;
 public class Item : MonoBehaviour
 {
     // Enum that represent all of the different items in game
-    public enum Items : byte { CompassFood, TeleportFood, ExplorationFood, ShieldFood }
+    public enum Items : byte { CompassFood, TeleportFood, ExplorationFood, ShieldFood, LoreScroll }
     public Items itemName; // Name of the item
     private string description; // Description of the item
 
@@ -24,6 +24,10 @@ public class Item : MonoBehaviour
         else if (itemName == Items.ShieldFood)
         {
             description = "This special food provides temporary protection from harm.";
+        }
+        else if (itemName == Items.LoreScroll)
+        {
+            description = "This ancient scroll contains valuable knowledge.";
         }
     }
 

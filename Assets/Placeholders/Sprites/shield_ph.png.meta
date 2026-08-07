@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: af0f91c671d9bf448b0b454610fd1d7e
+guid: 386c8fe9e3c9c1c4abf0c00a8e280289
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7811129728812072032
-    second: teleport_food_0
-  - first:
-      213: 6397149481836329852
-    second: teleport_food_1
-  - first:
-      213: -8936991908223713626
-    second: teleport_food_2
+      213: 5437001532653630608
+    second: shield_ph_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -43,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -119,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: teleport_food_0
+      name: shield_ph_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 87
-        width: 29
-        height: 62
+        x: 5
+        y: 2
+        width: 238
+        height: 246
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,52 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 06c365c6a15b66c60800000000000000
-      internalID: 7811129728812072032
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: teleport_food_1
-      rect:
-        serializedVersion: 2
-        x: 55
-        y: 87
-        width: 32
-        height: 62
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c7bbde76f8d37c850800000000000000
-      internalID: 6397149481836329852
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: teleport_food_2
-      rect:
-        serializedVersion: 2
-        x: 87
-        y: 56
-        width: 155
-        height: 124
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6aef8cda53d69f380800000000000000
-      internalID: -8936991908223713626
+      spriteID: 094f215661c147b40800000000000000
+      internalID: 5437001532653630608
       vertices: []
       indices: 
       edges: []
@@ -198,9 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      teleport_food_0: 7811129728812072032
-      teleport_food_1: 6397149481836329852
-      teleport_food_2: -8936991908223713626
+      shield_ph_0: 5437001532653630608
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

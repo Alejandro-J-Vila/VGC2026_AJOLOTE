@@ -11,15 +11,15 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f; // Speed at which the player moves
     private bool isMoving = false; // Flag to check if the player is currently moving
 
-    public Tilemap groundLayer; // Reference to the ground tilemap
-    public Tilemap obstacleLayer; // Reference to the obstacle tilemap
-    public Tilemap wallLayer; // Reference to the wall tilemap
-    public Tilemap fogLayer; // Reference to the fog tilemap
-    public Tilemap objectiveLayer; // Reference to the objective tilemap
+    private Tilemap groundLayer; // Reference to the ground tilemap
+    private Tilemap obstacleLayer; // Reference to the obstacle tilemap
+    private Tilemap wallLayer; // Reference to the wall tilemap
+    private Tilemap fogLayer; // Reference to the fog tilemap
+    private Tilemap objectiveLayer; // Reference to the objective tilemap
 
     public int fogRevealRadius = 2; // Radius around the player to reveal fog
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
-    public Vector3Int endPosition; // End position of the player in grid coordinates
+    private Vector3Int endPosition; // End position of the player in grid coordinates
 
     public Sprite playerUp; // Sprite for the player facing up
     public Sprite playerDown; // Sprite for the player facing down
@@ -29,26 +29,20 @@ public class PlayerController : MonoBehaviour
 
     private bool onObstacle = false; // Flag to indicate the player is deciding on an obstacle
     private bool onRespawn = false; // Flag to indicate the player is selecting skills on respawn
+    private bool onLore = false; // Flag to indicate the player is reading a lore scroll
     private bool obstaclePassed = false; // Flag to indicate the player passed an obstacle
     private bool gameOver = false; // Flag to indicate the player reached the end of the map
 
     void Start()
     {
-        // Initialize the start and end positions of the player in grid coordinates
-        startingPosition = new Vector3Int(-1, -9, 0);
-        endPosition = new Vector3Int(2, 44, 0);
         // Get the sprite renderer component attached to the player
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        // Set the position of the player to the center of the starting tile
-        transform.position = groundLayer.GetCellCenterWorld(startingPosition);
-        // Reveal the fog on the starting position
-        RevealFog(startingPosition);
+        spriteRenderer = GetComponent<SpriteRenderer>();   
     }
 
     void Update()
     {
         // Check if the player can move
-        if (isMoving || onObstacle || onRespawn || gameOver)
+        if (isMoving || onObstacle || onRespawn || onLore || gameOver)
         {
             return;
         }
@@ -74,6 +68,25 @@ public class PlayerController : MonoBehaviour
     {
         // Disable the move action when the script is disabled
         moveAction.Disable();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Check if the player collides with an item
+        Item item = collision.GetComponent<Item>();
+        // Check if the item is a regeneration food and the player has all the limbs, don't pick it up
+        if (item.itemName == Item.Items.RegenerationFood && !gm.LostLimb())
+        {
+            return;
+        }
+        else
+        {
+            // Let the game manager handle the item pickup
+            gm.PickItemUp(item);
+            // Destroy the item game object after pickup
+            Destroy(collision.gameObject);
+        }
+
     }
 
     private Vector3 GetMovementDirection()
@@ -214,6 +227,12 @@ public class PlayerController : MonoBehaviour
         onRespawn = res;
     }
 
+    public void SetOnLore(bool lore)
+    {
+        // Set the flag to indicate the player is reading a lore scroll
+        onLore = lore;
+    }
+
     public void SetObstaclePassed()
     {
         // Set the flag to indicate the obstacle was crossed
@@ -244,5 +263,34 @@ public class PlayerController : MonoBehaviour
             // Signal the game manager to show the corresponding panel and messages
             gm.ObstaclePassed();
         }
+    }
+
+    public void SetObjectivePositions(Vector3Int start, Vector3Int end)
+    {
+        // Set the starting and ending positions of the map
+        startingPosition = start;
+        endPosition = end;
+        // Set the position of the player to the center of the starting tile
+        transform.position = groundLayer.GetCellCenterWorld(startingPosition);
+        // Reveal the fog on the starting position
+        RevealFog(startingPosition);
+    }
+
+    public void SetExplorationRadius(int radius)
+    {
+        // Set the fog reveal radius to the new value
+        fogRevealRadius = radius;
+        // Reveal the fog with the new radius
+        RevealFog(groundLayer.WorldToCell(transform.position));
+    }
+
+    public void SetupLayers(Tilemap groundL, Tilemap obstacleL, Tilemap wallL, Tilemap fogL, Tilemap objectiveL)
+    {
+        // Setup the selected map layers
+        groundLayer = groundL;
+        obstacleLayer = obstacleL;
+        wallLayer = wallL;
+        fogLayer = fogL;
+        objectiveLayer = objectiveL;
     }
 }

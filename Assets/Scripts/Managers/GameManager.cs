@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
     public Tilemap[] itemLayerList; // List of all the map item layer configurations
     public Tilemap[] loreLayerList; // List of all the map lore layer configurations
     public Tilemap[] fogLayerList; // List of all the map fog layer configurations
+    public Tilemap[] topSpawnLayerList; // List of all the top spawn/end positions layer configurations
+    public Tilemap[] bottomSpawnLayerList; // List of all the bottom spawn/end positions layer configurations
+    public Tilemap[] leftSpawnLayerList; // List of all the left spawn/end positions layer configurations
+    public Tilemap[] rightSpawnLayerList; // List of all the right spawn/end positions layer configurations
     public ObstacleTile[] obstacleTilesList; // List of all the obstacle tiles
 
     private Skill[] skillList; // List of all the skills in the game
@@ -47,9 +51,8 @@ public class GameManager : MonoBehaviour
 
     public PlayerController pc; // Reference to the player
 
-    private Vector3Int[] startPositionList; // List of all the starting positions in the different map configurations
-    private Vector3Int[] endPositionList; // List of all the ending positions in the different map configurations
-
+    public Tile startTile; // Reference to the start tile
+    public Tile endTile; // Reference to the end tile
     private Vector3Int startPosition; // Player starting position in the map
     private Vector3Int endPosition; // Player end position in the map
 
@@ -71,6 +74,10 @@ public class GameManager : MonoBehaviour
     private Tilemap itemLayer; // Layer of the map where the items are spawned
     private Tilemap loreLayer; // Layer of the map where the lore scrolls are spawned
     private Tilemap obstacleLayer; // Layer of the map where all the obstacles are placed
+    private Tilemap topSpawnLayer; // Top spawn/end positions layer
+    private Tilemap bottomSpawnLayer; // Bottom spawn/end positions layer
+    private Tilemap leftSpawnLayer; // Left spawn/end positions layer
+    private Tilemap rightSpawnLayer; // Right spawn/end positions layer
 
     private int numberOfItems = 10; // Number of items to spawn in the map
     private int numberOfLoreScrolls = 5; // Number of lore scrolls to spawn in the map
@@ -585,7 +592,7 @@ public class GameManager : MonoBehaviour
         // Save the original exploration radius of the player
         int originalRadius = pc.fogRevealRadius;
         // Increase the exploration radius of the player
-        pc.SetExplorationRadius(5);
+        pc.SetExplorationRadius(4);
         // Wait for the item duration time
         yield return new WaitForSeconds(itemDuration);
         // Restore the exploration radius of the player to its original value
@@ -725,37 +732,77 @@ public class GameManager : MonoBehaviour
         return -1;
     }
 
+    private void SelectStartEndPositions()
+    {
+        // Decide where to start, (0: top, 1: right, 2: bottom, 3: left)
+        int rnd = Random.Range(0, 4);
+        switch (rnd)
+        {
+            case 0:
+                // Depending on the starting position, select the end position in the opposite side layer
+                startPosition = GetRandomPosition(topSpawnLayer);
+                endPosition = GetRandomPosition(bottomSpawnLayer);
+                break;
+            case 1:
+                startPosition = GetRandomPosition(rightSpawnLayer);
+                endPosition = GetRandomPosition(leftSpawnLayer);
+                break;
+            case 2:
+                startPosition = GetRandomPosition(bottomSpawnLayer);
+                endPosition = GetRandomPosition(topSpawnLayer);
+                break;
+            case 3:
+                startPosition = GetRandomPosition(leftSpawnLayer);
+                endPosition = GetRandomPosition(rightSpawnLayer);
+                break;
+        }
+        // Setup the start and end tiles in the objective layer
+        objectiveLayer.SetTile(startPosition, startTile);
+        objectiveLayer.SetTile(endPosition, endTile);
+    }
+
+    private Vector3Int GetRandomPosition(Tilemap layer)
+    {
+        // Get the boundaries of the layer
+        BoundsInt layerBounds = layer.cellBounds;
+        // Get the positions, tiles and amount of markers
+        int positionsCount = layer.GetTiles(layerBounds, out Tilemap.PositionArray positions, out Tilemap.TileArray tiles);
+        // Get a random index of the marker list
+        int rnd = Random.Range(0, positionsCount);
+        // Save the selected position
+        Vector3Int pos = positions[rnd];
+        // Dispose the positions and tiles arrays to free memory
+        positions.Dispose();
+        tiles.Dispose();
+        // Return the saved position
+        return pos;
+    }
+
     public void SelectMap()
     {
-        // Initialize the objective positions list
-        startPositionList = new Vector3Int[3];
-        endPositionList = new Vector3Int[3];
-        // Save the starting positions for the different map configurations
-        startPositionList[0] = new Vector3Int(-1, -9, 0);
-        startPositionList[1] = new Vector3Int(2, -9, 0);
-        startPositionList[2] = new Vector3Int(5, -11, 0);
-        // Save the ending positions for the different map configurations
-        endPositionList[0] = new Vector3Int(2, 44, 0);
-        endPositionList[1] = new Vector3Int(5, 44, 0);
-        endPositionList[2] = new Vector3Int(35, 34, 0);
         // Select a random number to choose one of the map configurations
         int rnd = Random.Range(0, 3);
-        // Setup the player layers with the corresponding configuration
-        pc.SetupLayers(groundLayerList[rnd], obstacleLayerList[rnd], wallLayerList[rnd], fogLayerList[rnd], objectiveLayerList[rnd]);
+        // Setup spawn/end layers with the corresponding configuration
+        topSpawnLayer = topSpawnLayerList[rnd];
+        bottomSpawnLayer = bottomSpawnLayerList[rnd];
+        leftSpawnLayer = leftSpawnLayerList[rnd];
+        rightSpawnLayer = rightSpawnLayerList[rnd];
         // Setup the used layers with the corresponding configuration
         obstacleLayer = obstacleLayerList[rnd];
         objectiveLayer = objectiveLayerList[rnd];
         itemLayer = itemLayerList[rnd];
         loreLayer = loreLayerList[rnd];
-        // Setup the corresponding starting and ending positions
-        startPosition = startPositionList[rnd];
-        endPosition = endPositionList[rnd];
+        // Select the start and end locations
+        SelectStartEndPositions();
+        // Setup the player layers with the corresponding configuration
+        pc.SetupLayers(groundLayerList[rnd], obstacleLayerList[rnd], wallLayerList[rnd], fogLayerList[rnd], objectiveLayerList[rnd]);
         // Set the player start and end positions
         pc.SetObjectivePositions(startPosition, endPosition);
     }
 
     public bool LostLimb()
     {
+        // Return if the amount of limbs is less than the total
         return limbsLeft < totalNumberOfLimbs;
     }
 }

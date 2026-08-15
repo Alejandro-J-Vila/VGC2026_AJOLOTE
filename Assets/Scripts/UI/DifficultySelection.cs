@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class DifficultySelection : MonoBehaviour
 {
-    private int levelSceneIndex = 3; // Level scene index
+    private int levelSceneIndex = 2; // Level scene index
     public void EasyDifficulty()
     {
         // Set the game difficulty to easy

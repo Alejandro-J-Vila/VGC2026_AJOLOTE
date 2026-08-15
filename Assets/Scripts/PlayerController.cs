@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public GameManager gm; // Reference to the game manager
     public InputAction moveAction; // Reference to the InputAction for movement
 
-    public float moveSpeed = 5f; // Speed at which the player moves
+    private float moveSpeed = 3f; // Speed at which the player moves
     private bool isMoving = false; // Flag to check if the player is currently moving
 
     private Tilemap groundLayer; // Reference to the ground tilemap
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private Tilemap fogLayer; // Reference to the fog tilemap
     private Tilemap objectiveLayer; // Reference to the objective tilemap
 
-    public int fogRevealRadius = 2; // Radius around the player to reveal fog
+    private int fogRevealRadius = 2; // Radius around the player to reveal fog
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
     private Vector3Int endPosition; // End position of the player in grid coordinates
 
@@ -25,11 +25,13 @@ public class PlayerController : MonoBehaviour
     public Sprite playerDown; // Sprite for the player facing down
     public Sprite playerLeft; // Sprite for the player facing left
     public Sprite playerRight; // Sprite for the player facing right
+    private Vector3 playerDirection; // Facing direction of the player at the start of the game
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
 
     private bool onObstacle = false; // Flag to indicate the player is deciding on an obstacle
     private bool onRespawn = false; // Flag to indicate the player is selecting skills on respawn
     private bool onLore = false; // Flag to indicate the player is reading a lore scroll
+    private bool onLimbAction = false; // Flag to indicate the player is watching the lost/recover limb animation
     private bool obstaclePassed = false; // Flag to indicate the player passed an obstacle
     private bool gameOver = false; // Flag to indicate the player reached the end of the map
 
@@ -42,7 +44,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Check if the player can move
-        if (isMoving || onObstacle || onRespawn || onLore || gameOver)
+        if (isMoving || onObstacle || onRespawn || onLore || onLimbAction || gameOver)
         {
             return;
         }
@@ -139,6 +141,8 @@ public class PlayerController : MonoBehaviour
         // Set the isMoving flag to true to indicate that the player is moving
         isMoving = true;
         Vector3 currentDirection = direction;
+        // Play the movement sound
+        SoundManager.sm.PlaySoundLoop(SoundManager.SoundTrack.Walk);
         // Continue moving in the current direction
         while (currentDirection != Vector3.zero)
         {
@@ -171,6 +175,8 @@ public class PlayerController : MonoBehaviour
         }
         // Set the isMoving flag to false to indicate that the player has stopped moving
         isMoving = false;
+        // Stop the movement sound
+        SoundManager.sm.StopSoundLoop();
     }
 
     private bool CanMoveTo(Vector3Int cell)
@@ -233,6 +239,12 @@ public class PlayerController : MonoBehaviour
         onLore = lore;
     }
 
+    public void SetOnLimbAction(bool limb)
+    {
+        // Set the flag to indicate the player is watching the lost/recover limb animation
+        onLimbAction = limb;
+    }
+
     public void SetObstaclePassed()
     {
         // Set the flag to indicate the obstacle was crossed
@@ -250,7 +262,7 @@ public class PlayerController : MonoBehaviour
         // Set the position of the player to the center of the starting position to respawn
         transform.position = groundLayer.GetCellCenterWorld(startingPosition);
         // Update the sprite to face up after respawning
-        SetPlayerSprite(Vector3.up);
+        SetPlayerSprite(playerDirection);
     }
 
     private void PassedObstacle()
@@ -274,6 +286,14 @@ public class PlayerController : MonoBehaviour
         transform.position = groundLayer.GetCellCenterWorld(startingPosition);
         // Reveal the fog on the starting position
         RevealFog(startingPosition);
+        // Set the player facing direction
+        SetPlayerSprite(playerDirection);
+    }
+
+    public int GetExplorationRadius()
+    {
+        // Return the fog reveal radius
+        return fogRevealRadius;
     }
 
     public void SetExplorationRadius(int radius)
@@ -292,5 +312,11 @@ public class PlayerController : MonoBehaviour
         wallLayer = wallL;
         fogLayer = fogL;
         objectiveLayer = objectiveL;
+    }
+
+    public void SetPlayerDirection(Vector3 direction)
+    {
+        // Setup the player facing direction
+        playerDirection = direction;
     }
 }

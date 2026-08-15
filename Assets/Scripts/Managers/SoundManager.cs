@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SoundManager : MonoBehaviour
 {
     // Enum for the different sound effects in the game
-    public enum SoundTrack : byte { Button_Hover, Button_Click }
+    public enum SoundTrack : byte { Walk, Cross_Success, Cross_Fail, Button_Hover, Button_Click }
     // Enum for the different music tracks in the game
     public enum MusicTrack : byte { Main_Menu, Level_One }
     public static SoundManager sm; // Static reference of the sound manager
@@ -65,12 +65,12 @@ public class SoundManager : MonoBehaviour
             SetToggles();
         }
         // If the scene loaded is the level
-        if (scene.name == "LevelOneScene")
+        if (scene.name == "LevelScene")
         {
             // Play the level music
             //PlayMusicLoop(MusicTrack.Level_One);
             // Set the sound and music toggles from the pause panel
-            //SetToggles();
+            SetToggles();
         }
         // If the scene loaded is the story scene
         if (scene.name == "StoryScene")

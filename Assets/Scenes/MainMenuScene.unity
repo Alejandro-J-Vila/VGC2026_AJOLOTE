@@ -179,8 +179,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: GAME NAME
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -608,8 +608,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1361,7 +1361,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &816010254
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1577,8 +1577,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1728,8 +1728,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2154,8 +2154,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicList: []
   soundList:
-  - {fileID: 8300000, guid: 7a75f444c4d14e4448811aea2d13552f, type: 3}
-  - {fileID: 8300000, guid: 36a3854cf907fe0478156441c92b4eac, type: 3}
+  - {fileID: 8300000, guid: 3f1f1f470d0dc4e4fa5c6e0385974f04, type: 3}
+  - {fileID: 8300000, guid: a3b2db731cc0c954baf72eb9fcd3f674, type: 3}
+  - {fileID: 8300000, guid: 491b2010829f68e4a8ba62c7c1fe1efe, type: 3}
+  - {fileID: 8300000, guid: 0640b6dadeeedf646a0726b59ead216d, type: 3}
+  - {fileID: 8300000, guid: c20cf94c13ca19b4f8b51bb8c802e160, type: 3}
   audioEnabled: {fileID: 21300000, guid: 8e1205b71656ad540967fbaca3f9799c, type: 3}
   audioDisabled: {fileID: 21300000, guid: 6da955b26a8e24b46aec65936a7ddf57, type: 3}
 --- !u!4 &1799733385
@@ -2237,8 +2240,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2940,8 +2943,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
+  m_sharedMaterial: {fileID: 6588072222138231825, guid: 43116fb4d74f0a04eacc7bf3b7f9f890, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

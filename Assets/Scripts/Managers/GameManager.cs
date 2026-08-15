@@ -40,8 +40,12 @@ public class GameManager : MonoBehaviour
     public Button confirmChoicesButton; // Reference to the confirm choices button in the reset menu
 
     public GameObject obstaclePanel; // Reference to the obstacle panel used when an obstacle is found
+    public Image obstacleImage; // Reference to the container used to show the obstacle encountered
+    public TMP_Text obstacleDescriptionText; // Reference to the text used to show the obstacle description
     public GameObject successPanel; // Reference to the success panel used when crossing an obstacle succesfully
-    public GameObject failPanel; // Reference to the fail panel used when failing to cross an obstacle
+    public GameObject limbAnimationPanel; // Reference to the panel used to show the limb animations when losing/regenerating a limb
+    private ImageAnimation limbAnimation; // Reference to script that handles the limb animations
+    public TMP_Text limbAnimationText; // Reference to the limb animation text
     public GameObject gameOverPanel; // Reference to the game over panel used when the player reach the end of the map
     public TMP_Text scoreText; // Reference to the score text in the game over panel
     public GameObject informationPanel; // Reference to the information panel used to show the player information about the items they pick up
@@ -50,9 +54,9 @@ public class GameManager : MonoBehaviour
     public TMP_Text loreText; // Reference to the lore text contained in the lore panel
 
     public PlayerController pc; // Reference to the player
+    private bool[] usedLore; // Lore flag array to know what lore scrolls the player encountered
 
-    public Tile startTile; // Reference to the start tile
-    public Tile endTile; // Reference to the end tile
+    public TileBase startEndTile; // Reference to the start/end tile
     private Vector3Int startPosition; // Player starting position in the map
     private Vector3Int endPosition; // Player end position in the map
 
@@ -85,6 +89,11 @@ public class GameManager : MonoBehaviour
     private int numberOfResets = 0; // Counter for the number of resets the player did
     private int safePassageProbability = 10; // Probability of passing an obstacle succesfully without the proper skill
 
+    public GameObject inGameMenu; // Reference to the in game menu
+    public Button gameMenuButton; // Reference to the in game menu button
+    private bool gameMenu = false; // Flag to indicate if the in game menu is open/closed
+    public GameObject helpPanel; // Reference to the in game help panel
+
     void Start()
     {
         // Select one of the maps to start the game
@@ -114,12 +123,20 @@ public class GameManager : MonoBehaviour
         resetPanel.SetActive(false);
         obstaclePanel.SetActive(false);
         successPanel.SetActive(false);
-        failPanel.SetActive(false);
+        limbAnimationPanel.SetActive(false);
         gameOverPanel.SetActive(false);
         informationPanel.SetActive(false);
         lorePanel.SetActive(false);
-        compass.SetActive(false); 
+        compass.SetActive(false);
         shield.SetActive(false);
+        inGameMenu.SetActive(gameMenu);
+        helpPanel.SetActive(false);
+        // Get the reference to the limb animation script
+        limbAnimation = limbAnimationPanel.GetComponent<ImageAnimation>();
+        // Initialize the used lore flag array
+        usedLore = new bool[13];
+        // The first lore piece is always used because it's the intro
+        usedLore[0] = true;
     }
 
     private void Update()
@@ -150,14 +167,14 @@ public class GameManager : MonoBehaviour
         // Create the skill list
         skillList = new Skill[8];
         // Initialize the skills list with all the skills in the game
-        skillList[(int)Skill.Skills.RedS] = new Skill(Skill.Skills.RedS, "Red skill", skillSprites[(int)Skill.Skills.RedS]);
-        skillList[(int)Skill.Skills.GreenS] = new Skill(Skill.Skills.GreenS, "Green skill", skillSprites[(int)Skill.Skills.GreenS]);
-        skillList[(int)Skill.Skills.BlueS] = new Skill(Skill.Skills.BlueS, "Blue skill", skillSprites[(int)Skill.Skills.BlueS]);
-        skillList[(int)Skill.Skills.YellowS] = new Skill(Skill.Skills.YellowS, "Yellow skill", skillSprites[(int)Skill.Skills.YellowS]);
-        skillList[(int)Skill.Skills.PinkS] = new Skill(Skill.Skills.PinkS, "Pink skill", skillSprites[(int)Skill.Skills.PinkS]);
-        skillList[(int)Skill.Skills.OrangeS] = new Skill(Skill.Skills.OrangeS, "Orange skill", skillSprites[(int)Skill.Skills.OrangeS]);
-        skillList[(int)Skill.Skills.NoSkill] = new Skill(Skill.Skills.NoSkill, "-", skillSprites[(int)Skill.Skills.NoSkill]);
-        skillList[(int)Skill.Skills.NoLimb] = new Skill(Skill.Skills.NoLimb, "x", skillSprites[(int)Skill.Skills.NoLimb]);
+        skillList[(int)Skill.Skills.RedS] = new Skill(Skill.Skills.RedS, skillSprites[(int)Skill.Skills.RedS]);
+        skillList[(int)Skill.Skills.GreenS] = new Skill(Skill.Skills.GreenS, skillSprites[(int)Skill.Skills.GreenS]);
+        skillList[(int)Skill.Skills.BlueS] = new Skill(Skill.Skills.BlueS, skillSprites[(int)Skill.Skills.BlueS]);
+        skillList[(int)Skill.Skills.YellowS] = new Skill(Skill.Skills.YellowS, skillSprites[(int)Skill.Skills.YellowS]);
+        skillList[(int)Skill.Skills.PinkS] = new Skill(Skill.Skills.PinkS, skillSprites[(int)Skill.Skills.PinkS]);
+        skillList[(int)Skill.Skills.OrangeS] = new Skill(Skill.Skills.OrangeS, skillSprites[(int)Skill.Skills.OrangeS]);
+        skillList[(int)Skill.Skills.NoSkill] = new Skill(Skill.Skills.NoSkill, skillSprites[(int)Skill.Skills.NoSkill]);
+        skillList[(int)Skill.Skills.NoLimb] = new Skill(Skill.Skills.NoLimb, skillSprites[(int)Skill.Skills.NoLimb]);
     }
 
     private void SetupResetMenu(bool randomSkills)
@@ -232,7 +249,7 @@ public class GameManager : MonoBehaviour
                     // Set the skill choice sprite to the corresponding skill sprite
                     skillChoiceImages[j].sprite = skill.icon;
                     // Set the skill choice description text to the corresponding skill description
-                    skillChoiceTexts[j].SetText(skill.description);
+                    skillChoiceTexts[j].SetText(TextManager.tm.GetSkillText((int)skill.name));
                     // Update the flag to indicate we selected a skill
                     notSelected = false;
                 }
@@ -362,6 +379,8 @@ public class GameManager : MonoBehaviour
         pc.SetOnRespawn(false);
         // Increase the number of resets
         numberOfResets++;
+        // Enable the in game menu button
+        gameMenuButton.enabled = true;
     }
 
     /**
@@ -383,8 +402,14 @@ public class GameManager : MonoBehaviour
         bool canMove = CheckSkills(obs);
         if (!canMove)
         {
+            // Disable the in game menu button
+            gameMenuButton.enabled = false;
             // If the player don't have the skill, show the obstacle panel to let them decide what to do
             obstaclePanel.SetActive(true);
+            // Show the obstacle tile to the player
+            obstacleImage.sprite = obstacle.sprite;
+            // Show the obstacle description to the player
+            obstacleDescriptionText.SetText(TextManager.tm.GetObstacleText((int)obstacle.obstacleName));
             // Signal the player to stop moving while deciding
             pc.SetOnObstacle(true);
         }
@@ -418,6 +443,8 @@ public class GameManager : MonoBehaviour
      */
     public void CrossObstacle()
     {
+        // Enable the in game menu button
+        gameMenuButton.enabled = true;
         // Hide the obstacle panel
         obstaclePanel.SetActive(false);
         // Signal the player that the decision is over, so it can move again
@@ -432,6 +459,8 @@ public class GameManager : MonoBehaviour
             // If it's 0, the player loses a limb
             if (rnd > safePassageProbability)
             {
+                // Set the animation variable to use later
+                ImageAnimation.AnimationType anim = ImageAnimation.AnimationType.NoAnim;
                 // The order of limb loosing is from first to last
                 // If the limb exists
                 if (skillSlots[0] != skillList[(byte)Skill.Skills.NoLimb])
@@ -440,22 +469,26 @@ public class GameManager : MonoBehaviour
                     skillSlots[0] = skillList[(byte)Skill.Skills.NoLimb];
                     // And set the skill sprite to no limb to indicate is off
                     skillSlotImagesG[0].sprite = skillSlots[0].icon;
+                    // Set the appropriate animation type to show the lost limb
+                    anim = ImageAnimation.AnimationType.LostLimb_1;
                 }
                 // Same with the others...
                 else if (skillSlots[1] != skillList[(byte)Skill.Skills.NoLimb])
                 {
                     skillSlots[1] = skillList[(byte)Skill.Skills.NoLimb];
                     skillSlotImagesG[1].sprite = skillSlots[1].icon;
+                    anim = ImageAnimation.AnimationType.LostLimb_2;
                 }
                 else if (skillSlots[2] != skillList[(byte)Skill.Skills.NoLimb])
                 {
                     skillSlots[2] = skillList[(byte)Skill.Skills.NoLimb];
                     skillSlotImagesG[2].sprite = skillSlots[2].icon;
+                    anim = ImageAnimation.AnimationType.LostLimb_3;
                 }
                 // Discount one limb to the counter
                 limbsLeft--;
-                // Show the fail crossing panel to indicate the player, he crosses at the cost of one limb
-                StartCoroutine(ShowAndHidePanel(failPanel));
+                // Show the limb animation panel and play the lost limb animation
+                SetupLimbAnimation(anim, true);
             }
             // If it's 1, the player is lucky and can cross without loosing a limb
             else
@@ -467,6 +500,8 @@ public class GameManager : MonoBehaviour
         // If the player has no limbs left
         else
         {
+            // Disable the in game menu button
+            gameMenuButton.enabled = false;
             // Setup the reset panel with new random skills
             SetupResetMenu(true);
             // Show the reset panel, to let them choose the new skills to respawn
@@ -490,6 +525,8 @@ public class GameManager : MonoBehaviour
         obstaclePanel.SetActive(false);
         // Let the player move
         pc.SetOnObstacle(false);
+        // Enable the in game menu button
+        gameMenuButton.enabled = true;
     }
 
     /**
@@ -497,6 +534,8 @@ public class GameManager : MonoBehaviour
      */
     public void ObstaclePassed()
     {
+        // Play the corresponding sound
+        SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Cross_Success);
         // Change the skill slot color for a second to indicate it was used
         StartCoroutine(FlashSkillUsed(skillUsed));
         // Show the obstacle crossed successfully panel
@@ -508,7 +547,7 @@ public class GameManager : MonoBehaviour
         // Show the target panel
         targetPanel.SetActive(true);
         // Wait for an amount of seconds
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(3.0f);
         // Hide the target panel
         targetPanel.SetActive(false);
     }
@@ -525,6 +564,8 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        // Disable the in game menu button
+        gameMenuButton.enabled = false;
         // Show the game over panel
         gameOverPanel.SetActive(true);
         // Show the score
@@ -552,11 +593,43 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(ShowShield());
                 break;
             case Item.Items.LoreScroll:
+                gameMenuButton.enabled = false;
                 pc.SetOnLore(true);
                 lorePanel.SetActive(true);
-                loreText.SetText(item.GetLore());
+                loreText.SetText(SelectLore());
                 break;
         }
+    }
+
+    private string SelectLore()
+    {
+        // Select a random index between the amount of lore pieces we have
+        int rnd = Random.Range(1, 13);
+        // Set the flag for iterating
+        bool found = false;
+        // Set the auxiliary string to store the lore text
+        string lore = "lore not found";
+        while (!found)
+        {
+            // If the lore in the selected index was already used
+            if (usedLore[rnd])
+            {
+                // Select another
+                rnd = Random.Range(1, 13);
+            }
+            // If the lore in the selected index wasn't used
+            else
+            {
+                // Set the flag to used
+                found = true;
+                // Mark the index to used
+                usedLore[rnd] = true;
+                // Get the corresponding lore item
+                lore = TextManager.tm.GetStoryText((TextManager.StoryText)rnd);
+            }
+        }
+        // Return the lore found
+        return lore;
     }
 
     private IEnumerator ShowCompass()
@@ -590,7 +663,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator IncreaseExplorationRadius()
     {
         // Save the original exploration radius of the player
-        int originalRadius = pc.fogRevealRadius;
+        int originalRadius = pc.GetExplorationRadius();
         // Increase the exploration radius of the player
         pc.SetExplorationRadius(4);
         // Wait for the item duration time
@@ -601,6 +674,8 @@ public class GameManager : MonoBehaviour
 
     private void RegenerateLimb()
     {
+        // Set the animation variable to use later
+        ImageAnimation.AnimationType anim = ImageAnimation.AnimationType.NoAnim;
         // The order of regeneration is from last to first
         // We check if the limb is lost
         if (skillSlots[2] == skillList[(byte)Skill.Skills.NoLimb])
@@ -611,6 +686,8 @@ public class GameManager : MonoBehaviour
             skillSlotImagesG[2].sprite = skillSlotsBackup[2].icon;
             // Increase the limb counter
             limbsLeft++;
+            // Select the proper animation
+            anim = ImageAnimation.AnimationType.RecoverLimb_3;
         }
         // Same with the others...
         else if (skillSlots[1] == skillList[(byte)Skill.Skills.NoLimb])
@@ -618,13 +695,17 @@ public class GameManager : MonoBehaviour
             skillSlots[1] = skillSlotsBackup[1];
             skillSlotImagesG[1].sprite = skillSlotsBackup[1].icon;
             limbsLeft++;
+            anim = ImageAnimation.AnimationType.RecoverLimb_2;
         }
         else if (skillSlots[0] == skillList[(byte)Skill.Skills.NoLimb])
         {
             skillSlots[0] = skillSlotsBackup[0];
             skillSlotImagesG[0].sprite = skillSlotsBackup[0].icon;
             limbsLeft++;
+            anim = ImageAnimation.AnimationType.RecoverLimb_1;
         }
+        // Show the limb animation panel and play the limb regeneration animation
+        SetupLimbAnimation(anim, false);
     }
 
     public void CloseLorePanel()
@@ -632,6 +713,8 @@ public class GameManager : MonoBehaviour
         // Hide the lore panel and signal the player to move again
         lorePanel.SetActive(false);
         pc.SetOnLore(false);
+        // Enable the in game menu button
+        gameMenuButton.enabled = true;
     }
 
     private void SpawnItems(Tilemap layer, int spawnQuantity, bool scroll)
@@ -740,25 +823,30 @@ public class GameManager : MonoBehaviour
         {
             case 0:
                 // Depending on the starting position, select the end position in the opposite side layer
+                // also set the facing position of the player
                 startPosition = GetRandomPosition(topSpawnLayer);
                 endPosition = GetRandomPosition(bottomSpawnLayer);
+                pc.SetPlayerDirection(Vector3.down);
                 break;
             case 1:
                 startPosition = GetRandomPosition(rightSpawnLayer);
                 endPosition = GetRandomPosition(leftSpawnLayer);
+                pc.SetPlayerDirection(Vector3.left);
                 break;
             case 2:
                 startPosition = GetRandomPosition(bottomSpawnLayer);
                 endPosition = GetRandomPosition(topSpawnLayer);
+                pc.SetPlayerDirection(Vector3.up);
                 break;
             case 3:
                 startPosition = GetRandomPosition(leftSpawnLayer);
                 endPosition = GetRandomPosition(rightSpawnLayer);
+                pc.SetPlayerDirection(Vector3.right);
                 break;
         }
         // Setup the start and end tiles in the objective layer
-        objectiveLayer.SetTile(startPosition, startTile);
-        objectiveLayer.SetTile(endPosition, endTile);
+        objectiveLayer.SetTile(startPosition, startEndTile);
+        objectiveLayer.SetTile(endPosition, startEndTile);
     }
 
     private Vector3Int GetRandomPosition(Tilemap layer)
@@ -804,5 +892,84 @@ public class GameManager : MonoBehaviour
     {
         // Return if the amount of limbs is less than the total
         return limbsLeft < totalNumberOfLimbs;
+    }
+
+    public void SetOnLimbAction(bool limb)
+    {
+        // Signal the player he can/can't move because limb animation is playing
+        pc.SetOnLimbAction(limb);
+    }
+
+    public void SetupLimbAnimation(ImageAnimation.AnimationType anim, bool lost)
+    {
+        // Set the limb animation
+        limbAnimation.SetAnimation(anim);
+        // Signal the player to not move while animation is playing
+        SetOnLimbAction(true);
+        // Depending on the event, show the proper message and change the color of the panel
+        if (lost)
+        {
+            limbAnimationText.SetText(TextManager.tm.GetUIText(TextManager.UIText.limb_animation_lost));
+            limbAnimationPanel.GetComponent<Image>().color = Color.darkRed;
+        }
+        else
+        {
+            limbAnimationText.SetText(TextManager.tm.GetUIText(TextManager.UIText.limb_animation_regen));
+            limbAnimationPanel.GetComponent<Image>().color = Color.darkGreen;
+        }
+        // Show the limb animation panel
+        limbAnimationPanel.SetActive(true);
+        // Play the limb animation
+        limbAnimation.PlayAnimation();
+    }
+
+    /**
+     * This method is called from the game by pressing the hotkey or the Menu button
+     */
+    public void InGameMenu()
+    {
+        // If the button is disabled, do nothing
+        if (!gameMenuButton.enabled)
+        {
+            return;
+        }
+        // If the game menu is open
+        if (gameMenu)
+        {
+            // Close it
+            gameMenu = false;
+            // Signal the player to not move
+            pc.SetOnLore(false);
+        }
+        else
+        {
+            // Else, open it
+            gameMenu = true;
+            // Signal the player to move again
+            pc.SetOnLore(true);
+        }
+        inGameMenu.SetActive(gameMenu);
+    }
+
+    /**
+     * This method is called from the game by pressing the hotkey or the Menu button
+     */
+    public void ShowHelp()
+    {
+        // Show the help panel
+        helpPanel.SetActive(true);
+        // Disable the in game menu button
+        gameMenuButton.enabled = false;
+    }
+
+    /**
+     * This method is called from the game by pressing the hotkey or the Menu button
+     */
+    public void CloseHelp()
+    {
+        // Hide the help panel
+        helpPanel.SetActive(false);
+        // Enable the in game menu button
+        gameMenuButton.enabled = true;
     }
 }

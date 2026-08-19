@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     private Skill[] skillSlotsBackup; // Backup list of the skills the player has equipped to restore when the player uses a regeneration item
     private int skillSlotsCount = 3; // Number of skill slots the player has
     public Image[] skillSlotImagesG; // List of the UI images that represent the skills the player has equipped in game
+    public Image[] skillSlotFlash; // List of the UI images used to flash the skills used
     public Image[] skillSlotImagesR; // List of the UI images that represent the skills the player has selected in the reset menu
     
     private Skill[] skillChoices; // List of the skills the player can choose from in the reset menu
@@ -73,6 +74,7 @@ public class GameManager : MonoBehaviour
     private bool compassOn = false; // Compass flag to indicate the compass activation
     public GameObject shield; // Game object to show to the player when a shield item is picked up
     private bool shieldOn = false; // Shield flag to indicate the shield activation
+    private bool increasedExploration = false; // Exploration flag to indicate the increased exploration activation
 
     private Tilemap objectiveLayer; // Layer of the map where the start and end positions are stored
     private Tilemap itemLayer; // Layer of the map where the items are spawned
@@ -85,6 +87,8 @@ public class GameManager : MonoBehaviour
 
     private int numberOfItems = 10; // Number of items to spawn in the map
     private int numberOfLoreScrolls = 5; // Number of lore scrolls to spawn in the map
+    private int loreCollected = 0; // Number of lore scrolls the player has collected
+    public TMP_Text loreCollectedText; // Reference to the lore collected
 
     private int numberOfResets = 0; // Counter for the number of resets the player did
     private int safePassageProbability = 10; // Probability of passing an obstacle succesfully without the proper skill
@@ -93,6 +97,9 @@ public class GameManager : MonoBehaviour
     public Button gameMenuButton; // Reference to the in game menu button
     private bool gameMenu = false; // Flag to indicate if the in game menu is open/closed
     public GameObject helpPanel; // Reference to the in game help panel
+
+    public GameObject mate; // Reference to the mate game object to place at the end position to better indicate it
+    public GameObject tutorialPanel; // Reference to the ingame tutorial panel 
 
     void Start()
     {
@@ -131,12 +138,17 @@ public class GameManager : MonoBehaviour
         shield.SetActive(false);
         inGameMenu.SetActive(gameMenu);
         helpPanel.SetActive(false);
+        tutorialPanel.SetActive(false);
         // Get the reference to the limb animation script
         limbAnimation = limbAnimationPanel.GetComponent<ImageAnimation>();
         // Initialize the used lore flag array
         usedLore = new bool[13];
         // The first lore piece is always used because it's the intro
         usedLore[0] = true;
+        // Update the lore collected count
+        UpdateLoreCollected();
+        // Show the tutorial panel at the start of the game
+        StartCoroutine(ShowAndHidePanel(tutorialPanel));
     }
 
     private void Update()
@@ -430,8 +442,8 @@ public class GameManager : MonoBehaviour
             // Compare the skills with the obstacles
             if ((byte)skillSlots[i].name == (byte)obstacle)
             {
-                // If the player has the skill, save the skill slot used
-                skillUsed = skillSlotImagesG[i];
+                // If the player has the skill, save the skill flash slot used
+                skillUsed = skillSlotFlash[i];
                 return true;
             }
         }
@@ -487,6 +499,8 @@ public class GameManager : MonoBehaviour
                 }
                 // Discount one limb to the counter
                 limbsLeft--;
+                // Decrease player movement speed to reflect the limb loss
+                pc.SetMovementSpeed(false, false);
                 // Show the limb animation panel and play the lost limb animation
                 SetupLimbAnimation(anim, true);
             }
@@ -512,6 +526,8 @@ public class GameManager : MonoBehaviour
             pc.Retreat();
             // Restore all the limbs lost
             limbsLeft = totalNumberOfLimbs;
+            // Reset the player movement speed to its original value
+            pc.SetMovementSpeed(false, true);
         }
     }
 
@@ -555,11 +571,27 @@ public class GameManager : MonoBehaviour
     private IEnumerator FlashSkillUsed(Image target)
     {
         // Change the color of the target image
-        target.color = Color.black;
+        target.color = new Color(1f, 1f, 0f, 1f);
         // Wait for an amount of seconds
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         // Change the color of the target image to its original color
-        target.color = Color.white;
+        target.color = new Color(1f, 1f, 0f, 0f);
+        // Wait a very little time to restart
+        yield return new WaitForSeconds(0.01f);
+        // Flash again
+        target.color = new Color(1f, 1f, 0f, 1f);
+        yield return new WaitForSeconds(0.1f);
+        target.color = new Color(1f, 1f, 0f, 0f);
+        yield return new WaitForSeconds(0.01f);
+        // Flash again
+        target.color = new Color(1f, 1f, 0f, 1f);
+        yield return new WaitForSeconds(0.1f);
+        target.color = new Color(1f, 1f, 0f, 0f);
+        yield return new WaitForSeconds(0.01f);
+        // Flash again
+        target.color = new Color(1f, 1f, 0f, 1f);
+        yield return new WaitForSeconds(0.1f);
+        target.color = new Color(1f, 1f, 0f, 0f);
     }
 
     public void GameOver()
@@ -662,12 +694,16 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator IncreaseExplorationRadius()
     {
+        // Activate the increased exploration
+        increasedExploration = true;
         // Save the original exploration radius of the player
         int originalRadius = pc.GetExplorationRadius();
         // Increase the exploration radius of the player
         pc.SetExplorationRadius(4);
         // Wait for the item duration time
         yield return new WaitForSeconds(itemDuration);
+        // Deactivate the increased exploration
+        increasedExploration = false;
         // Restore the exploration radius of the player to its original value
         pc.SetExplorationRadius(originalRadius);
     }
@@ -706,6 +742,8 @@ public class GameManager : MonoBehaviour
         }
         // Show the limb animation panel and play the limb regeneration animation
         SetupLimbAnimation(anim, false);
+        // Increase player movement speed to reflect the limb regeneration
+        pc.SetMovementSpeed(true, false);
     }
 
     public void CloseLorePanel()
@@ -715,6 +753,9 @@ public class GameManager : MonoBehaviour
         pc.SetOnLore(false);
         // Enable the in game menu button
         gameMenuButton.enabled = true;
+        // Update the lore collected count
+        loreCollected++;
+        UpdateLoreCollected();
     }
 
     private void SpawnItems(Tilemap layer, int spawnQuantity, bool scroll)
@@ -823,26 +864,31 @@ public class GameManager : MonoBehaviour
         {
             case 0:
                 // Depending on the starting position, select the end position in the opposite side layer
-                // also set the facing position of the player
+                // also set the facing position of the player and the mate position
                 startPosition = GetRandomPosition(topSpawnLayer);
                 endPosition = GetRandomPosition(bottomSpawnLayer);
+                SetMatePosition(pc.playerUp, new Vector3Int(0, -1, 0));
                 pc.SetPlayerDirection(Vector3.down);
                 break;
             case 1:
                 startPosition = GetRandomPosition(rightSpawnLayer);
                 endPosition = GetRandomPosition(leftSpawnLayer);
+                SetMatePosition(pc.playerRight, new Vector3Int(-1, 0, 0));
                 pc.SetPlayerDirection(Vector3.left);
                 break;
             case 2:
                 startPosition = GetRandomPosition(bottomSpawnLayer);
                 endPosition = GetRandomPosition(topSpawnLayer);
+                SetMatePosition(pc.playerDown, new Vector3Int(0, 1, 0));
                 pc.SetPlayerDirection(Vector3.up);
                 break;
             case 3:
                 startPosition = GetRandomPosition(leftSpawnLayer);
                 endPosition = GetRandomPosition(rightSpawnLayer);
+                SetMatePosition(pc.playerLeft, new Vector3Int(1, 0, 0));
                 pc.SetPlayerDirection(Vector3.right);
                 break;
+                
         }
         // Setup the start and end tiles in the objective layer
         objectiveLayer.SetTile(startPosition, startEndTile);
@@ -864,6 +910,18 @@ public class GameManager : MonoBehaviour
         tiles.Dispose();
         // Return the saved position
         return pos;
+    }
+
+    private void SetMatePosition(Sprite mateSprite, Vector3Int positionOffset)
+    {
+        // Add the offset to the end position to place the mate
+        Vector3Int matePosition = endPosition + positionOffset;
+        // Change the mate sprite to face the correct direction
+        mate.GetComponent<SpriteRenderer>().sprite = mateSprite;
+        // Instantiate the mate in the calculated position
+        Instantiate(mate, objectiveLayer.GetCellCenterWorld(matePosition), Quaternion.identity);
+        // Set the appropriate tile in that position
+        objectiveLayer.SetTile(matePosition, startEndTile);
     }
 
     public void SelectMap()
@@ -892,6 +950,24 @@ public class GameManager : MonoBehaviour
     {
         // Return if the amount of limbs is less than the total
         return limbsLeft < totalNumberOfLimbs;
+    }
+
+    public bool ShieldOn()
+    {
+        // Return if the shield is on
+        return shieldOn;
+    }
+
+    public bool CompassOn()
+    {
+        // Return if the compass is on
+        return compassOn;
+    }
+
+    public bool ExplorationOn()
+    {
+        // Return if the increased exploration is on
+        return increasedExploration;
     }
 
     public void SetOnLimbAction(bool limb)
@@ -971,5 +1047,19 @@ public class GameManager : MonoBehaviour
         helpPanel.SetActive(false);
         // Enable the in game menu button
         gameMenuButton.enabled = true;
+    }
+
+    private void UpdateLoreCollected()
+    {
+        // Update the lore scrolls collected text
+        loreCollectedText.SetText(loreCollected + "/" + numberOfLoreScrolls);
+        // If the player collected all the lore scrolls in the level
+        if (loreCollected == numberOfLoreScrolls)
+        {
+            // Show a congrats message
+            string msj = TextManager.tm.GetUIText(TextManager.UIText.lore_collected_msj);
+            informationText.SetText(msj);
+            StartCoroutine(ShowAndHidePanel(informationPanel));
+        }
     }
 }

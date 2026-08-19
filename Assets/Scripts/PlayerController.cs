@@ -8,7 +8,8 @@ public class PlayerController : MonoBehaviour
     public GameManager gm; // Reference to the game manager
     public InputAction moveAction; // Reference to the InputAction for movement
 
-    private float moveSpeed = 3f; // Speed at which the player moves
+    private float maxMoveSpeed = 5f; // Maximun speed at which the player can move
+    private float moveSpeed = 5f; // Current speed at which the player moves
     private bool isMoving = false; // Flag to check if the player is currently moving
 
     private Tilemap groundLayer; // Reference to the ground tilemap
@@ -76,19 +77,27 @@ public class PlayerController : MonoBehaviour
     {
         // Check if the player collides with an item
         Item item = collision.GetComponent<Item>();
-        // Check if the item is a regeneration food and the player has all the limbs, don't pick it up
+        // Check if the item is regeneration and the player has all the limbs, don't pick it up
         if (item.itemName == Item.Items.RegenerationFood && !gm.LostLimb())
         {
             return;
         }
-        else
+        if (item.itemName == Item.Items.ShieldFood && gm.ShieldOn())
         {
-            // Let the game manager handle the item pickup
-            gm.PickItemUp(item);
-            // Destroy the item game object after pickup
-            Destroy(collision.gameObject);
+            return;
         }
-
+        if (item.itemName == Item.Items.CompassFood && gm.CompassOn())
+        {
+            return;
+        }
+        if (item.itemName == Item.Items.ExplorationFood && gm.ExplorationOn())
+        {
+            return;
+        }
+        // Let the game manager handle the item pickup
+        gm.PickItemUp(item);
+        // Destroy the item game object after pickup
+        Destroy(collision.gameObject);
     }
 
     private Vector3 GetMovementDirection()
@@ -318,5 +327,27 @@ public class PlayerController : MonoBehaviour
     {
         // Setup the player facing direction
         playerDirection = direction;
+    }
+
+    public void SetMovementSpeed(bool increase, bool reset)
+    {
+        // If the reset flag is on
+        if (reset)
+        {
+            // Reset the movement speed to its original value
+            moveSpeed = maxMoveSpeed;
+        }
+        else
+        {
+            // Depending on the increase flag, increase or decrease the movement speed by 1
+            if (increase)
+            {
+                moveSpeed++;
+            }
+            else
+            {
+                moveSpeed--;
+            }
+        }
     }
 }

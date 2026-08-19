@@ -54,8 +54,11 @@ public class TextManager : MonoBehaviour
         lore_panel_title,
         limb_animation_regen,
         limb_animation_lost,
+        end_game_title,
+        score_msj,
         end_game_msj,
-        score_msj
+        tutorial_msj,
+        lore_collected_msj
     }
     // Enum to represent the different titles that appear in the credits
     public enum CreditsText : byte
@@ -104,7 +107,7 @@ public class TextManager : MonoBehaviour
         }
         // Initialize all the text lists in english
         storyTextEN = new string[] {
-            "You're the last male Axolotl in the world, and pollution has turned the lake you once called home into a dangerous place.\nTo ensure your survival and that of your species, you must escape, reunite with your mate, and find a new home together, far away from the pollution.",
+            "You're the last male Axolotl in the world, and pollution has turned the lake you once called home into a dangerous place.\n\nTo ensure your survival and that of your species, you must escape, reunite with your mate, and find a new home together, far away from the pollution.",
             "Axolotls always sleep with their eyes open because they don't have eyelids.",
             "Axolotls can live for up to 15 years and retain their larval traits throughout their entire lives.",
             "Axolotls have some ability to change color to camouflage themselves.",
@@ -127,14 +130,14 @@ public class TextManager : MonoBehaviour
             "CREDITS",
             "QUIT",
             "BACK",
-            "SKIP",
+            "START",
             "EASY",
             "NORMAL",
             "HARD",
             "MENU (Z)",
-            "HOW TO PLAY (E)",
-            "RESET CHOICES (E)",
-            "CONFIRM AND RESPAWN (Q)",
+            "HELP (E)",
+            "RESET (E)",
+            "CONFIRM (Q)",
             "CROSS (Q)",
             "GO BACK (E)",
             "CLOSE (Q)",
@@ -144,7 +147,7 @@ public class TextManager : MonoBehaviour
         uiTextEN = new string[] {
             "GAME NAME",
             "HELP",
-            "Try to reach the end of the laberinth.\n\nDon't be afraid to lose some of your limbs when crossing obstacles, you can regenerate them.\n\nWhen you regenerate, you can choose adaptations that let you cross obstacles safely.\n\nPay attention to the obstacles you cross to choose your adaptations wisely.\n\nWhen you don't have adaptations, you have a little chance of crossing obstacles without harm.\n\nYou will find useful items scattered across the laberinth that will help you.\n\nW A S D -- Move\nLMB -- Interact",
+            "Try to reach the end of the laberinth.\n\nDon't be afraid to lose some of your limbs when crossing obstacles, you can regenerate them.\n\nWhen you regenerate, you can choose adaptations that let you cross obstacles safely.\n\nPay attention to the obstacles you cross to choose your adaptations wisely.\n\nWhen you don't have adaptations, you have a little chance of crossing obstacles without harm.\n\nYou will find useful items scattered across the laberinth that will help you.\n\nW A S D -- Move\nLMB (or shortcuts) -- Click buttons",
             "SETTINGS",
             "SOUND",
             "MUSIC",
@@ -152,7 +155,7 @@ public class TextManager : MonoBehaviour
             "DIFFICULTY",
             "MAIN MENU",
             "HOW TO PLAY",
-            "You lost too many limbs and had to retreat. Use your superpower to regenerate and adapt.",
+            "You lost too many limbs and had to retreat.\nUse your superpower to regenerate and adapt.",
             "Select your new limb adaptations.",
             "OBSTACLE ENCOUNTERED",
             "You are not adapted to cross it safely.",
@@ -160,8 +163,11 @@ public class TextManager : MonoBehaviour
             "Axolotl's curious facts",
             "You regenerated a limb!!",
             "You lost a limb!!",
-            "CONGRATULATIONS!!\nYOU WIN!",
-            "NUMBER OF RESPAWNS"
+            "CONGRATULATIONS!!",
+            "NUMBER OF RESPAWNS",
+            "You managed to escape and reunite with your mate\nNow you can begin a new life away from pollution",
+            "W A S D -- Movement",
+            "CONGRATULATIONS! You found all the lore scrolls!"
         };
         creditsTextEN = new string[] {
             "TEAM AXOLOTL",
@@ -176,10 +182,10 @@ public class TextManager : MonoBehaviour
             "TO YOU!\nfor playing the game!"
         };
         itemDescriptionsEN = new string[] {
-            "This special food gives you a better sense of orientation",
-            "This special food allows you to instantly regenerate a lost limb",
-            "This special food enhances your vision allowing to see further",
-            "This special food provides temporary protection from harm",
+            "This special item gives you a better sense of orientation",
+            "This special item allows you to instantly regenerate a lost limb",
+            "This special item enhances your vision allowing to see further",
+            "This special item provides temporary protection from harm",
             "This ancient scroll contains valuable knowledge"
         };
         obstacleDescriptionsEN = new string[] {
@@ -200,7 +206,7 @@ public class TextManager : MonoBehaviour
         };
         // Initialize all the text lists in spanish
         storyTextES = new string[] {
-            "Eres el último Ajolote macho del mundo y la contaminación ha convertido la laguna que una vez llamaste hogar, en un lugar peligroso para seguir viviendo.\nPara asegurar tu supervivencia y la de tu especie, debes escapar para reencontrarte con tu pareja y buscar un nuevo hogar juntos, lejos de la contaminación.",
+            "Eres el último Ajolote macho del mundo y la contaminación ha convertido la laguna que una vez llamaste hogar, en un lugar peligroso para seguir viviendo.\n\nPara asegurar tu supervivencia y la de tu especie, debes escapar para reencontrarte con tu pareja y buscar un nuevo hogar juntos, lejos de la contaminación.",
             "Los Ajolotes siempre duermen con los ojos abiertos porque no tienen párpados.",
             "Los Ajolotes viven hasta 15 años y conservan sus rasgos larvales toda su vida.",
             "Los Ajolotes tienen cierta capacidad de cambiar de color para camuflarse.",
@@ -223,14 +229,14 @@ public class TextManager : MonoBehaviour
             "CRÉDITOS",
             "SALIR",
             "ATRÁS",
-            "SALTAR",
+            "EMPEZAR",
             "FÁCIL",
             "NORMAL",
             "DIFÍCIL",
             "MENÚ (Z)",
-            "CÓMO JUGAR (E)",
-            "RESTABLECER ADAPTACIONES (E)",
-            "CONFIRMAR Y REAPARECER (Q)",
+            "AYUDA (E)",
+            "RESTABLECER (E)",
+            "CONFIRMAR (Q)",
             "CRUZAR (Q)",
             "VOLVER (E)",
             "CERRAR (Q)",
@@ -240,7 +246,7 @@ public class TextManager : MonoBehaviour
         uiTextES = new string[] {
             "NOMBRE DEL JUEGO",
             "AYUDA",
-            "Tratá de llegar al final del laberinto.\n\nNo tengas miedo de perder extremidades al cruzar obstáculos, las podés regenerar.\n\nCuando te regenerás, podés elegir adaptaciones que te permitan cruzar los obstáculos de forma segura.\n\nPrestá atención a los obstáculos que encontrás, así podes elegir mejor las adaptaciones.\n\nCuando no tenés adaptaciones, hay una pequeña chance de cruzar un obstáculo sin recibir daño.\n\nVas a encontrar ítems utiles distribuidos en el laberinto que te van a ayudar.\n\nW A S D -- Movimiento\nLMB -- Interactuar",
+            "Tratá de llegar al final del laberinto.\n\nNo tengas miedo de perder extremidades al cruzar obstáculos, las podés regenerar.\n\nCuando te regenerás, podés elegir adaptaciones que te permitan cruzar los obstáculos de forma segura.\n\nPrestá atención a los obstáculos que encontrás, así podes elegir mejor las adaptaciones.\n\nCuando no tenés adaptaciones, hay una pequeña chance de cruzar un obstáculo sin recibir daño.\n\nVas a encontrar ítems útiles distribuidos en el laberinto que te van a ayudar.\n\nW A S D -- Movimiento\nBIM (o atajos) -- Clickear botones",
             "OPCIONES",
             "SONIDO",
             "MÚSICA",
@@ -248,7 +254,7 @@ public class TextManager : MonoBehaviour
             "DIFICULTAD",
             "MENÚ PRINCIPAL",
             "CÓMO JUGAR",
-            "Perdiste demasiadas extremidades y tuviste que retroceder. Usa tu superpoder para regenerarte y adaptarte.",
+            "Perdiste demasiadas extremidades y tuviste que retroceder.\nUsa tu superpoder para regenerarte y adaptarte.",
             "Selecciona las adaptaciones para tus nuevas extremidades.",
             "OBSTÁCULO ENCONTRADO",
             "No estás adaptado para cruzar de forma segura.",
@@ -256,8 +262,11 @@ public class TextManager : MonoBehaviour
             "Datos curiosos de los Ajolotes",
             "Regeneraste una extremidad!!",
             "Perdiste una extremidad!!",
-            "FELICITACIONES!!\nGANASTE!",
-            "CANTIDAD DE REAPARICIONES"
+            "FELICITACIONES!!",
+            "CANTIDAD DE REAPARICIONES",
+            "Lograste escapar y reencontrarte con tu pareja\nAhora pueden comenzar una nueva vida lejos de la contaminación",
+            "W A S D -- Movimiento",
+            "FELICITACIONES! Encontraste todos los pergaminos de lore!"
         };
         creditsTextES = new string[] {
             "EQUIPO AJOLOTE",
@@ -272,10 +281,10 @@ public class TextManager : MonoBehaviour
             "A VOS!\npor jugar el juego!"
         };
         itemDescriptionsES = new string[] {
-            "Este alimento especial te da un mejor sentido de orientación",
-            "Este alimento especial te permite regenerar instantaneamente una extremidad perdida",
-            "Este alimento especial mejora tu visión y te permite ver mas lejos",
-            "Este alimento especial te otorga protección temporal contra cualquier daño",
+            "Este objeto especial te da un mejor sentido de orientación",
+            "Este objeto especial te permite regenerar instantaneamente una extremidad perdida",
+            "Este objeto especial mejora tu visión y te permite ver mas lejos",
+            "Este objeto especial te otorga protección temporal contra cualquier daño",
             "Este pergamino antiguo contiene conocimiento valioso"
         };
         obstacleDescriptionsES = new string[] {

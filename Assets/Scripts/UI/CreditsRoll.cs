@@ -43,9 +43,9 @@ public class CreditsRoll : MonoBehaviour
         // Move the panel up
         rollingPanel.anchoredPosition += new Vector2(0, scrollSpeed * Time.deltaTime);
         // When the panel reach the final position, reset it to the initial position
-        if (rollingPanel.anchoredPosition.y >= 3340)
+        if (rollingPanel.anchoredPosition.y >= 3526)
         {
-            rollingPanel.anchoredPosition -= new Vector2(0, 4400);
+            rollingPanel.anchoredPosition -= new Vector2(0, 4585);
         }
     }
 

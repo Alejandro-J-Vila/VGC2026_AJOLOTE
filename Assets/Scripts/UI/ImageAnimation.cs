@@ -50,10 +50,14 @@ public class ImageAnimation : MonoBehaviour
     /**
      * This methoid is called from the game manager when this animation is needed
      */
-    public void PlayAnimation()
+    public void PlayAnimation(bool lost)
     {
-        // Play the corresponding sound
-        SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Cross_Fail);
+        // If the animation is the loosing a limb
+        if (lost)
+        {
+            // Play the corresponding sound
+            SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Cross_Fail);
+        }
         // Play the animation
         StartCoroutine(PlayAnim());
     }

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 public class SoundManager : MonoBehaviour
 {
     // Enum for the different sound effects in the game
-    public enum SoundTrack : byte { Walk, Cross_Success, Cross_Fail, Button_Hover, Button_Click }
+    public enum SoundTrack : byte { Compass_It, Exploration_It, Lore_It, Regeneration_It, Shield_It, Cross_Fail, Cross_Success, Walk, Button_Click, Button_Hover }
     // Enum for the different music tracks in the game
-    public enum MusicTrack : byte { Main_Menu, Level_One }
+    public enum MusicTrack : byte { Main_Menu, Level, Game_Over }
     public static SoundManager sm; // Static reference of the sound manager
     public AudioClip[] musicList; // List of music clips of the game to play in the different scenes
     public AudioClip[] soundList; // List of sound clips of the game to play in the different situations
@@ -55,7 +55,7 @@ public class SoundManager : MonoBehaviour
                 // Set the in menus flag to true because we enter the menus coming from the game or just started the game
                 inMenus = true;
                 // Play the main menu music loop
-                //PlayMusicLoop(MusicTrack.Main_Menu);
+                PlayMusicLoop(MusicTrack.Main_Menu);
             }
         }
         // If the scene loaded is the settings
@@ -65,10 +65,10 @@ public class SoundManager : MonoBehaviour
             SetToggles();
         }
         // If the scene loaded is the level
-        if (scene.name == "LevelScene")
+        if (scene.name == "LevelScene_Easy" || scene.name == "LevelScene_Normal" || scene.name == "LevelScene_Hard")
         {
             // Play the level music
-            //PlayMusicLoop(MusicTrack.Level_One);
+            PlayMusicLoop(MusicTrack.Level);
             // Set the sound and music toggles from the pause panel
             SetToggles();
         }
@@ -94,6 +94,8 @@ public class SoundManager : MonoBehaviour
 
     public void PlayMusicOneShot(MusicTrack music)
     {
+        // Stop the current music clip loop
+        musicLoopAudioSource.Stop();
         // Stop the current clip
         musicAudioSource.Stop();
         // Play a music clip selected with index from a list of clips stored in the manager

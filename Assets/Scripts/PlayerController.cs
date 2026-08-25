@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
@@ -8,8 +9,8 @@ public class PlayerController : MonoBehaviour
     public GameManager gm; // Reference to the game manager
     public InputAction moveAction; // Reference to the InputAction for movement
 
-    private float maxMoveSpeed = 5f; // Maximun speed at which the player can move
-    private float moveSpeed = 5f; // Current speed at which the player moves
+    private float maxMoveSpeed = 3f; // Maximun speed at which the player can move
+    private float moveSpeed = 3f; // Current speed at which the player moves
     private bool isMoving = false; // Flag to check if the player is currently moving
 
     private Tilemap groundLayer; // Reference to the ground tilemap
@@ -19,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private Tilemap objectiveLayer; // Reference to the objective tilemap
 
     private int fogRevealRadius = 2; // Radius around the player to reveal fog
+    private float fogFadeDuration = 0.3f; // Fog reveal duration
     private Vector3Int startingPosition; // Starting position of the player in grid coordinates
     private Vector3Int endPosition; // End position of the player in grid coordinates
 
@@ -218,6 +220,8 @@ public class PlayerController : MonoBehaviour
 
     private void RevealFog(Vector3Int radiusCenter)
     {
+        // Create a hash to store the cells we already started revealing to avoid starting them again
+        HashSet<Vector3Int> processedTiles = new HashSet<Vector3Int>();
         // We calculate a radius around the player to reveal fog
         for (int x = -fogRevealRadius; x <= fogRevealRadius; x++)
         {
@@ -225,9 +229,37 @@ public class PlayerController : MonoBehaviour
             {
                 // Reveal each cell inside that radius
                 Vector3Int fogCell = new Vector3Int(radiusCenter.x + x, radiusCenter.y + y, radiusCenter.z);
-                fogLayer.SetTile(fogCell, null);
+                // If the cell has a tile and is not already being revealed
+                if (fogLayer.HasTile(fogCell) && !processedTiles.Contains(fogCell))
+                {
+                    // Add the cell to the processed tiles
+                    processedTiles.Add(fogCell);
+                    // Start revealing it
+                    StartCoroutine(FadeFog(fogCell, fogFadeDuration));
+                }
             }
         }
+    }
+
+    private IEnumerator FadeFog(Vector3Int fogPosition, float fadeDuration)
+    {
+        // Get the color of the cell
+        Color startColor = fogLayer.GetColor(fogPosition);
+        // Time variable for the loop
+        float elapsedTime = 0f;
+        // While the fade duration lasts
+        while (elapsedTime < fadeDuration)
+        {
+            // Add elapsed time
+            elapsedTime += Time.deltaTime;
+            // Calculate the amount of alpha to apply to the cell sprite
+            float newAlpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
+            // Set the new color with the new alpha to the sprite
+            fogLayer.SetColor(fogPosition, new Color(startColor.r, startColor.g, startColor.b, newAlpha));
+            yield return null;
+        }
+        // When the fade is complete, remove the tile
+        fogLayer.SetTile(fogPosition, null);
     }
 
     public void SetOnObstacle(bool obs)
@@ -342,11 +374,11 @@ public class PlayerController : MonoBehaviour
             // Depending on the increase flag, increase or decrease the movement speed by 1
             if (increase)
             {
-                moveSpeed++;
+                moveSpeed += 0.35f;
             }
             else
             {
-                moveSpeed--;
+                moveSpeed -= 0.35f;
             }
         }
     }

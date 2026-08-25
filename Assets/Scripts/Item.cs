@@ -7,11 +7,22 @@ public class Item : MonoBehaviour
     public static float totalSpawnChance = 1.6f; // Total spawn chance for all items;
     public static int totalItemCount = 4; // Total number of items in the game (not counting the lore scrolls)
     public Items itemName; // Name of the item
+    private float bobSpeed = 2.0f; // Speed at which the item bobs
+    private float bobDistance = 0.1f; // Distance that the item travels when bobbing
+    private Vector3 startPosition; // Starting position of the item
+
+    private void Start()
+    {
+        // Save the starting position
+        startPosition = transform.position;
+    }
 
     void Update()
     {
-        // Simple rotation animation for the item
-        transform.Rotate(0, 100f * Time.deltaTime, 0);
+        // Calculate a new y coordinate following a sin function to mimic the bobbing movement
+        float newY = startPosition.y + (Mathf.Sin(Time.time * bobSpeed) * bobDistance);
+        // Apply the new y coordinate to the item
+        transform.position = new Vector3(startPosition.x, newY, startPosition.z);
     }
 
     public string GetDescription()

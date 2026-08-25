@@ -58,7 +58,14 @@ public class TextManager : MonoBehaviour
         score_msj,
         end_game_msj,
         tutorial_msj,
-        lore_collected_msj
+        lore_collected_msj,
+        lore_score_msj,
+        easy_difficulty_msj,
+        normal_difficulty_msj,
+        hard_difficulty_msj,
+        easy_description,
+        normal_description,
+        hard_description
     }
     // Enum to represent the different titles that appear in the credits
     public enum CreditsText : byte
@@ -71,6 +78,7 @@ public class TextManager : MonoBehaviour
         code_role,
         sthanks_title,
         sthanks_msj,
+        sthanks_msj_2,
         vsthanks_title,
         vsthanks_msj
     }
@@ -107,7 +115,7 @@ public class TextManager : MonoBehaviour
         }
         // Initialize all the text lists in english
         storyTextEN = new string[] {
-            "You're the last male Axolotl in the world, and pollution has turned the lake you once called home into a dangerous place.\n\nTo ensure your survival and that of your species, you must escape, reunite with your mate, and find a new home together, far away from the pollution.",
+            "You are Loty, the last male Axolotl in the world, and pollution has turned the lake you once called home into a dangerous place.\n\nTo ensure your survival and that of your species, you must escape, reunite with your mate, and find a new home together, far away from the pollution.",
             "Axolotls always sleep with their eyes open because they don't have eyelids.",
             "Axolotls can live for up to 15 years and retain their larval traits throughout their entire lives.",
             "Axolotls have some ability to change color to camouflage themselves.",
@@ -145,7 +153,7 @@ public class TextManager : MonoBehaviour
             "QUIT"
         };
         uiTextEN = new string[] {
-            "GAME NAME",
+            "MAZE POND: LOTY'S ODDYSEE",
             "HELP",
             "Try to reach the end of the laberinth.\n\nDon't be afraid to lose some of your limbs when crossing obstacles, you can regenerate them.\n\nWhen you regenerate, you can choose adaptations that let you cross obstacles safely.\n\nPay attention to the obstacles you cross to choose your adaptations wisely.\n\nWhen you don't have adaptations, you have a little chance of crossing obstacles without harm.\n\nYou will find useful items scattered across the laberinth that will help you.\n\nW A S D -- Move\nLMB (or shortcuts) -- Click buttons",
             "SETTINGS",
@@ -167,7 +175,14 @@ public class TextManager : MonoBehaviour
             "NUMBER OF RESPAWNS",
             "You managed to escape and reunite with your mate\nNow you can begin a new life away from pollution",
             "W A S D -- Movement",
-            "CONGRATULATIONS! You found all the lore scrolls!"
+            "CONGRATULATIONS! You found all the lore scrolls!",
+            "LORE SCROLLS FOUND",
+            "EASY DIFFICULTY RESULTS",
+            "NORMAL DIFFICULTY RESULTS",
+            "HARD DIFFICULTY RESULTS",
+            "EASY DIFFICULTY:\n\n - Simpler level layout.\n - Higher chance of crossing obstacles without harm.\n - Increased quantity of helpful items.",
+            "NORMAL DIFFICULTY:\n\n - Moderate level layout.\n - Lower chance of crossing obstacles without harm.\n - Moderate quantity of helpful items.",
+            "HARD DIFFICULTY:\n\n - Complex level layout.\n - Very little chance of crossing obstacles without harm.\n - Reduced quantity of helpful items."
         };
         creditsTextEN = new string[] {
             "TEAM AXOLOTL",
@@ -178,6 +193,7 @@ public class TextManager : MonoBehaviour
             "PROGRAMMING",
             "SPECIAL THANKS",
             "For organizing the event",
+            "For playtesting and giving feedback",
             "VERY SPECIAL THANKS",
             "TO YOU!\nfor playing the game!"
         };
@@ -206,7 +222,7 @@ public class TextManager : MonoBehaviour
         };
         // Initialize all the text lists in spanish
         storyTextES = new string[] {
-            "Eres el último Ajolote macho del mundo y la contaminación ha convertido la laguna que una vez llamaste hogar, en un lugar peligroso para seguir viviendo.\n\nPara asegurar tu supervivencia y la de tu especie, debes escapar para reencontrarte con tu pareja y buscar un nuevo hogar juntos, lejos de la contaminación.",
+            "Eres Loty, el último Ajolote macho del mundo y la contaminación ha convertido la laguna que una vez llamaste hogar, en un lugar peligroso para seguir viviendo.\n\nPara asegurar tu supervivencia y la de tu especie, debes escapar para reencontrarte con tu pareja y buscar un nuevo hogar juntos, lejos de la contaminación.",
             "Los Ajolotes siempre duermen con los ojos abiertos porque no tienen párpados.",
             "Los Ajolotes viven hasta 15 años y conservan sus rasgos larvales toda su vida.",
             "Los Ajolotes tienen cierta capacidad de cambiar de color para camuflarse.",
@@ -244,7 +260,7 @@ public class TextManager : MonoBehaviour
             "SALIR"
         };
         uiTextES = new string[] {
-            "NOMBRE DEL JUEGO",
+            "MAZE POND: LOTY'S ODDYSEE",
             "AYUDA",
             "Tratá de llegar al final del laberinto.\n\nNo tengas miedo de perder extremidades al cruzar obstáculos, las podés regenerar.\n\nCuando te regenerás, podés elegir adaptaciones que te permitan cruzar los obstáculos de forma segura.\n\nPrestá atención a los obstáculos que encontrás, así podes elegir mejor las adaptaciones.\n\nCuando no tenés adaptaciones, hay una pequeña chance de cruzar un obstáculo sin recibir daño.\n\nVas a encontrar ítems útiles distribuidos en el laberinto que te van a ayudar.\n\nW A S D -- Movimiento\nBIM (o atajos) -- Clickear botones",
             "OPCIONES",
@@ -266,7 +282,14 @@ public class TextManager : MonoBehaviour
             "CANTIDAD DE REAPARICIONES",
             "Lograste escapar y reencontrarte con tu pareja\nAhora pueden comenzar una nueva vida lejos de la contaminación",
             "W A S D -- Movimiento",
-            "FELICITACIONES! Encontraste todos los pergaminos de lore!"
+            "FELICITACIONES! Encontraste todos los pergaminos de lore!",
+            "PERGAMINOS DE LORE ENCONTRADOS",
+            "RESULTADOS DIFICULTAD FÁCIL",
+            "RESULTADOS DIFICULTAD NORMAL",
+            "RESULTADOS DIFICULTAD DIFÍCIL",
+            "DIFICULTAD FÁCIL:\n\n - Distribución del nivel más simple.\n - Alta chance de pasar por los obstáculos sin recibir daño.\n - Cantidad incrementada de items útiles.",
+            "DIFICULTAD NORMAL:\n\n - Distribución del nivel moderada.\n - Baja chance de pasar por los obstáculos sin recibir daño.\n - Cantidad moderada de items útiles.",
+            "DIFICULTAD DIFÍCIL:\n\n - Distribución del nivel más compleja.\n - Muy baja chance de pasar por los obstáculos sin recibir daño.\n - Cantidad reducida de items útiles.",
         };
         creditsTextES = new string[] {
             "EQUIPO AJOLOTE",
@@ -277,6 +300,7 @@ public class TextManager : MonoBehaviour
             "PROGRAMACIÓN",
             "AGRADECIMIENTOS ESPECIALES",
             "Por organizar el evento",
+            "Por el playtesting y el feedback",
             "AGRADECIMIENTOS MUY ESPECIALES",
             "A VOS!\npor jugar el juego!"
         };

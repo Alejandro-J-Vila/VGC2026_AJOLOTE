@@ -48,6 +48,10 @@ public class GameManager : MonoBehaviour
     private ImageAnimation limbAnimation; // Reference to script that handles the limb animations
     public TMP_Text limbAnimationText; // Reference to the limb animation text
     public GameObject gameOverPanel; // Reference to the game over panel used when the player reach the end of the map
+    public GameObject gameOverAnimationText; // Reference to the text shown during the game over animation
+    public GameObject gameOverPostAnimationText; // Reference to the text after the game over animation ended
+    public Image gameOverAnimationImage; // Reference to the background image of the game over panel
+    public Sprite[] gameOverSprites; // List of sprites for the game over animation
     public TMP_Text scoreText; // Reference to the score text in the game over panel
     public GameObject informationPanel; // Reference to the information panel used to show the player information about the items they pick up
     public TMP_Text informationText; // Reference to the information text contained in the information panel
@@ -85,13 +89,14 @@ public class GameManager : MonoBehaviour
     private Tilemap leftSpawnLayer; // Left spawn/end positions layer
     private Tilemap rightSpawnLayer; // Right spawn/end positions layer
 
-    private int numberOfItems = 10; // Number of items to spawn in the map
+    private int numberOfItems; // Number of items to spawn in the map
     private int numberOfLoreScrolls = 5; // Number of lore scrolls to spawn in the map
     private int loreCollected = 0; // Number of lore scrolls the player has collected
     public TMP_Text loreCollectedText; // Reference to the lore collected
+    public TMP_Text loreScoreText; // Reference to the lore score text in the game over panel
 
     private int numberOfResets = 0; // Counter for the number of resets the player did
-    private int safePassageProbability = 10; // Probability of passing an obstacle succesfully without the proper skill
+    private int safePassageProbability; // Probability of passing an obstacle succesfully without the proper skill
 
     public GameObject inGameMenu; // Reference to the in game menu
     public Button gameMenuButton; // Reference to the in game menu button
@@ -107,6 +112,8 @@ public class GameManager : MonoBehaviour
         SelectMap();
         // Randomize all the obstacles in the map
         RandomizeObstacles();
+        // Set the difficulty parameters
+        SetDifficultyParameters();
         // Spawn the items in the level
         SpawnItems(itemLayer, numberOfItems, false);
         // Spawn the lore scrolls in the level
@@ -132,6 +139,8 @@ public class GameManager : MonoBehaviour
         successPanel.SetActive(false);
         limbAnimationPanel.SetActive(false);
         gameOverPanel.SetActive(false);
+        gameOverAnimationText.SetActive(false);
+        gameOverPostAnimationText.SetActive(false);
         informationPanel.SetActive(false);
         lorePanel.SetActive(false);
         compass.SetActive(false);
@@ -172,6 +181,26 @@ public class GameManager : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         // Rotate the compass to point towards the end position
         compass.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+    }
+
+    private void SetDifficultyParameters()
+    {
+        // Depending on the difficulty set all the variable parameters of the game
+        switch (DataManager.difficulty)
+        {
+            case DataManager.Difficulty.Easy:
+                numberOfItems = 20;
+                safePassageProbability = 40;
+                return;
+            case DataManager.Difficulty.Normal:
+                numberOfItems = 15;
+                safePassageProbability = 25;
+                return;
+            case DataManager.Difficulty.Hard:
+                numberOfItems = 10;
+                safePassageProbability = 10;
+                return;
+        }
     }
 
     private void InitializeSkillList()
@@ -563,7 +592,7 @@ public class GameManager : MonoBehaviour
         // Show the target panel
         targetPanel.SetActive(true);
         // Wait for an amount of seconds
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(4.0f);
         // Hide the target panel
         targetPanel.SetActive(false);
     }
@@ -577,17 +606,17 @@ public class GameManager : MonoBehaviour
         // Change the color of the target image to its original color
         target.color = new Color(1f, 1f, 0f, 0f);
         // Wait a very little time to restart
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.05f);
         // Flash again
         target.color = new Color(1f, 1f, 0f, 1f);
         yield return new WaitForSeconds(0.1f);
         target.color = new Color(1f, 1f, 0f, 0f);
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.05f);
         // Flash again
         target.color = new Color(1f, 1f, 0f, 1f);
         yield return new WaitForSeconds(0.1f);
         target.color = new Color(1f, 1f, 0f, 0f);
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.05f);
         // Flash again
         target.color = new Color(1f, 1f, 0f, 1f);
         yield return new WaitForSeconds(0.1f);
@@ -602,6 +631,11 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(true);
         // Show the score
         scoreText.SetText("" + numberOfResets);
+        loreScoreText.SetText(loreCollected + "/" + numberOfLoreScrolls);
+        // Play the game over music
+        SoundManager.sm.PlayMusicOneShot(SoundManager.MusicTrack.Game_Over);
+        // Play the game over animation
+        StartCoroutine(PlayGameOverAnimation());
     }
 
     public void PickItemUp(Item item)
@@ -613,18 +647,23 @@ public class GameManager : MonoBehaviour
         switch (item.itemName)
         {
             case Item.Items.CompassFood:
+                SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Compass_It);
                 StartCoroutine(ShowCompass());
                 break;
             case Item.Items.RegenerationFood:
+                SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Regeneration_It);
                 RegenerateLimb();
                 break;
             case Item.Items.ExplorationFood:
+                SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Exploration_It);
                 StartCoroutine(IncreaseExplorationRadius());
                 break;
             case Item.Items.ShieldFood:
+                SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Shield_It);
                 StartCoroutine(ShowShield());
                 break;
             case Item.Items.LoreScroll:
+                SoundManager.sm.PlaySoundOneShot(SoundManager.SoundTrack.Lore_It);
                 gameMenuButton.enabled = false;
                 pc.SetOnLore(true);
                 lorePanel.SetActive(true);
@@ -986,17 +1025,17 @@ public class GameManager : MonoBehaviour
         if (lost)
         {
             limbAnimationText.SetText(TextManager.tm.GetUIText(TextManager.UIText.limb_animation_lost));
-            limbAnimationPanel.GetComponent<Image>().color = Color.darkRed;
+            limbAnimationPanel.GetComponent<Image>().color = new Color(1, 0, 0);
         }
         else
         {
             limbAnimationText.SetText(TextManager.tm.GetUIText(TextManager.UIText.limb_animation_regen));
-            limbAnimationPanel.GetComponent<Image>().color = Color.darkGreen;
+            limbAnimationPanel.GetComponent<Image>().color = new Color(0, 1, 0);
         }
         // Show the limb animation panel
         limbAnimationPanel.SetActive(true);
         // Play the limb animation
-        limbAnimation.PlayAnimation();
+        limbAnimation.PlayAnimation(lost);
     }
 
     /**
@@ -1061,5 +1100,25 @@ public class GameManager : MonoBehaviour
             informationText.SetText(msj);
             StartCoroutine(ShowAndHidePanel(informationPanel));
         }
+    }
+
+    private IEnumerator PlayGameOverAnimation()
+    {
+        // Show the animation text
+        gameOverAnimationText.SetActive(true);
+        // Set the wait variable
+        WaitForSeconds wait = new WaitForSeconds(0.7f);
+        // Loop through the animation indexes
+        for (int i = 0; i < gameOverSprites.Length; i++)
+        {
+            // Set the animation container to the appropriate animation frame
+            gameOverAnimationImage.sprite = gameOverSprites[i];
+            // Wait the desired time
+            yield return wait;
+        }
+        // Hide the animation text
+        gameOverAnimationText.SetActive(false);
+        // Show the post animation text
+        gameOverPostAnimationText.SetActive(true);
     }
 }

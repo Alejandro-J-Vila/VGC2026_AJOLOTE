@@ -587,6 +587,16 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ShowAndHidePanel(successPanel));
     }
 
+    /**
+     * This method is called from the player controller when the player tries to pick an item he already has
+     */
+    public void ItemInUse(TextManager.UIText msj)
+    {
+        // Show the information panel with a message for the player indicating he already has an item in use
+        informationText.SetText(TextManager.tm.GetUIText(msj));
+        StartCoroutine(ShowAndHidePanel(informationPanel));
+    }
+
     private IEnumerator ShowAndHidePanel(GameObject targetPanel)
     {
         // Show the target panel

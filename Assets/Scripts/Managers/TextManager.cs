@@ -65,7 +65,11 @@ public class TextManager : MonoBehaviour
         hard_difficulty_msj,
         easy_description,
         normal_description,
-        hard_description
+        hard_description,
+        compass_in_use,
+        regen_not_needed,
+        exploration_in_use,
+        shield_in_use
     }
     // Enum to represent the different titles that appear in the credits
     public enum CreditsText : byte
@@ -182,7 +186,11 @@ public class TextManager : MonoBehaviour
             "HARD DIFFICULTY RESULTS",
             "EASY DIFFICULTY:\n\n - Simpler level layout.\n - Higher chance of crossing obstacles without harm.\n - Increased quantity of helpful items.",
             "NORMAL DIFFICULTY:\n\n - Moderate level layout.\n - Lower chance of crossing obstacles without harm.\n - Moderate quantity of helpful items.",
-            "HARD DIFFICULTY:\n\n - Complex level layout.\n - Very little chance of crossing obstacles without harm.\n - Reduced quantity of helpful items."
+            "HARD DIFFICULTY:\n\n - Complex level layout.\n - Very little chance of crossing obstacles without harm.\n - Reduced quantity of helpful items.",
+            "You already have a compass active",
+            "You don't need limb regeneration right now",
+            "You already have increased exploration radius active",
+            "You already have a shield active"
         };
         creditsTextEN = new string[] {
             "TEAM AXOLOTL",
@@ -290,6 +298,10 @@ public class TextManager : MonoBehaviour
             "DIFICULTAD FÁCIL:\n\n - Distribución del nivel más simple.\n - Alta chance de pasar por los obstáculos sin recibir daño.\n - Cantidad incrementada de items útiles.",
             "DIFICULTAD NORMAL:\n\n - Distribución del nivel moderada.\n - Baja chance de pasar por los obstáculos sin recibir daño.\n - Cantidad moderada de items útiles.",
             "DIFICULTAD DIFÍCIL:\n\n - Distribución del nivel más compleja.\n - Muy baja chance de pasar por los obstáculos sin recibir daño.\n - Cantidad reducida de items útiles.",
+            "Todavía tenés una brújula activa",
+            "No necesitás regeneración de extremidades en este momento",
+            "Todavía tenés un incremento de radio de exploración activo",
+            "Todavía tenés un escudo activo"
         };
         creditsTextES = new string[] {
             "EQUIPO AJOLOTE",

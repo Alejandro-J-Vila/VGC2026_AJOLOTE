@@ -82,18 +82,22 @@ public class PlayerController : MonoBehaviour
         // Check if the item is regeneration and the player has all the limbs, don't pick it up
         if (item.itemName == Item.Items.RegenerationFood && !gm.LostLimb())
         {
+            gm.ItemInUse(TextManager.UIText.regen_not_needed);
             return;
         }
         if (item.itemName == Item.Items.ShieldFood && gm.ShieldOn())
         {
+            gm.ItemInUse(TextManager.UIText.shield_in_use);
             return;
         }
         if (item.itemName == Item.Items.CompassFood && gm.CompassOn())
         {
+            gm.ItemInUse(TextManager.UIText.compass_in_use);
             return;
         }
         if (item.itemName == Item.Items.ExplorationFood && gm.ExplorationOn())
         {
+            gm.ItemInUse(TextManager.UIText.exploration_in_use);
             return;
         }
         // Let the game manager handle the item pickup
